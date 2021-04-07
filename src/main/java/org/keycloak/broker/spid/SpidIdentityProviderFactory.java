@@ -14,11 +14,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package it.redhat.spid.provider;
+package org.keycloak.broker.spid;
 
-import it.redhat.spid.provider.SpidIdentityProvider;
+import java.io.InputStream;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.xml.namespace.QName;
+
 import org.keycloak.Config.Scope;
 import org.keycloak.broker.provider.AbstractIdentityProviderFactory;
+import org.keycloak.common.util.Time;
+import org.keycloak.dom.saml.v2.assertion.AttributeType;
 import org.keycloak.dom.saml.v2.metadata.EndpointType;
 import org.keycloak.dom.saml.v2.metadata.EntitiesDescriptorType;
 import org.keycloak.dom.saml.v2.metadata.EntityDescriptorType;
@@ -34,18 +43,15 @@ import org.keycloak.saml.processing.core.parsers.saml.SAMLParser;
 import org.keycloak.saml.validators.DestinationValidator;
 import org.w3c.dom.Element;
 
-import javax.xml.namespace.QName;
-import java.io.InputStream;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 /**
  * @author Pedro Igor
  */
 public class SpidIdentityProviderFactory extends AbstractIdentityProviderFactory<SpidIdentityProvider> {
 
     public static final String PROVIDER_ID = "spid";
+
+    private static final String MACEDIR_ENTITY_CATEGORY = "http://macedir.org/entity-category";
+    private static final String REFEDS_HIDE_FROM_DISCOVERY = "http://refeds.org/category/hide-from-discovery";
 
     private DestinationValidator destinationValidator;
 
@@ -57,6 +63,11 @@ public class SpidIdentityProviderFactory extends AbstractIdentityProviderFactory
     @Override
     public SpidIdentityProvider create(KeycloakSession session, IdentityProviderModel model) {
         return new SpidIdentityProvider(session, new SpidIdentityProviderConfig(model), destinationValidator);
+    }
+
+    @Override
+    public SpidIdentityProviderConfig createConfig() {
+        return new SpidIdentityProviderConfig();
     }
 
     @Override
@@ -120,6 +131,11 @@ public class SpidIdentityProviderFactory extends AbstractIdentityProviderFactory
                     samlIdentityProviderConfig.setPostBindingResponse(postBindingResponse);
                     samlIdentityProviderConfig.setPostBindingAuthnRequest(postBindingResponse);
                     samlIdentityProviderConfig.setPostBindingLogout(postBindingLogout);
+                    samlIdentityProviderConfig.setLoginHint(false);
+
+                    List<String> nameIdFormatList = idpDescriptor.getNameIDFormat();
+                    if (nameIdFormatList != null && !nameIdFormatList.isEmpty())
+                        samlIdentityProviderConfig.setNameIDPolicyFormat(nameIdFormatList.get(0));
 
                     List<KeyDescriptorType> keyDescriptor = idpDescriptor.getKeyDescriptor();
                     String defaultCertificate = null;
@@ -149,6 +165,20 @@ public class SpidIdentityProviderFactory extends AbstractIdentityProviderFactory
                         }
                     }
 
+                    samlIdentityProviderConfig.setEnabledFromMetadata(entityType.getValidUntil() == null
+                        || entityType.getValidUntil().toGregorianCalendar().getTime().after(new Date(System.currentTimeMillis())));
+
+                    // check for hide on login attribute
+                    if (entityType.getExtensions() != null && entityType.getExtensions().getEntityAttributes() != null) {
+                        for (AttributeType attribute : entityType.getExtensions().getEntityAttributes().getAttribute()) {
+                            if (MACEDIR_ENTITY_CATEGORY.equals(attribute.getName())
+                                && attribute.getAttributeValue().contains(REFEDS_HIDE_FROM_DISCOVERY)) {
+                                samlIdentityProviderConfig.setHideOnLogin(true);
+                            }
+                        }
+
+                    }
+
                     return samlIdentityProviderConfig.getConfig();
                 }
             }
@@ -156,7 +186,7 @@ public class SpidIdentityProviderFactory extends AbstractIdentityProviderFactory
             throw new RuntimeException("Could not parse IdP SAML Metadata", pe);
         }
 
-        return new HashMap<String, String>();
+        return new HashMap<>();
     }
 
     @Override
