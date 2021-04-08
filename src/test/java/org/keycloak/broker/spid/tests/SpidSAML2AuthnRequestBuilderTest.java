@@ -1,11 +1,10 @@
 package org.keycloak.broker.spid.tests;
 
-import org.keycloak.broker.spid.SpidSAML2AuthnRequestBuilder;
+import org.keycloak.saml.SpidSAML2AuthnRequestBuilder;
 import org.junit.Assert;
 import org.junit.Test;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
 
 public class SpidSAML2AuthnRequestBuilderTest {
 

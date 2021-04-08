@@ -14,16 +14,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.keycloak.broker.spid;
+package org.keycloak.saml;
 
 import org.keycloak.dom.saml.v2.assertion.NameIDType;
-import org.keycloak.dom.saml.v2.assertion.SubjectType;
 import org.keycloak.dom.saml.v2.protocol.AuthnRequestType;
-import org.keycloak.dom.saml.v2.protocol.ExtensionsType;
-import org.keycloak.dom.saml.v2.protocol.RequestedAuthnContextType;
-import org.keycloak.saml.SAML2NameIDBuilder;
-import org.keycloak.saml.SAML2RequestedAuthnContextBuilder;
-import org.keycloak.saml.SamlProtocolExtensionsAwareBuilder;
 import org.keycloak.saml.processing.api.saml.v2.request.SAML2Request;
 import org.keycloak.saml.processing.core.saml.v2.common.IDGenerator;
 import org.keycloak.saml.processing.core.saml.v2.util.XMLTimeUtil;
@@ -32,6 +26,7 @@ import org.w3c.dom.Document;
 import java.net.URI;
 import java.util.LinkedList;
 import java.util.List;
+import org.keycloak.dom.saml.v2.protocol.ExtensionsType;
 
 /**
  * @author pedroigor
@@ -40,7 +35,7 @@ public class SpidSAML2AuthnRequestBuilder implements SamlProtocolExtensionsAware
 
     private final AuthnRequestType authnRequestType;
     protected String destination;
-    protected NameIDType issuer;
+    protected String issuer;
     protected final List<NodeGenerator> extensions = new LinkedList<>();
 
     public SpidSAML2AuthnRequestBuilder destination(String destination) {
@@ -48,13 +43,9 @@ public class SpidSAML2AuthnRequestBuilder implements SamlProtocolExtensionsAware
         return this;
     }
 
-    public SpidSAML2AuthnRequestBuilder issuer(NameIDType issuer) {
+    public SpidSAML2AuthnRequestBuilder issuer(String issuer) {
         this.issuer = issuer;
         return this;
-    }
-
-    public SpidSAML2AuthnRequestBuilder issuer(String issuer) {
-        return issuer(SAML2NameIDBuilder.value(issuer).build());
     }
 
     @Override
@@ -77,11 +68,6 @@ public class SpidSAML2AuthnRequestBuilder implements SamlProtocolExtensionsAware
         return this;
     }
 
-    public SpidSAML2AuthnRequestBuilder attributeConsumingServiceIndex(Integer attributeConsumingServiceIndex) {
-        this.authnRequestType.setAttributeConsumingServiceIndex(attributeConsumingServiceIndex);
-        return this;
-    }
-
     public SpidSAML2AuthnRequestBuilder forceAuthn(boolean forceAuthn) {
         this.authnRequestType.setForceAuthn(forceAuthn);
         return this;
@@ -92,8 +78,8 @@ public class SpidSAML2AuthnRequestBuilder implements SamlProtocolExtensionsAware
         return this;
     }
 
-    public SpidSAML2AuthnRequestBuilder nameIdPolicy(SpidSAML2NameIDPolicyBuilder nameIDPolicyBuilder) {
-        this.authnRequestType.setNameIDPolicy(nameIDPolicyBuilder.build());
+    public SpidSAML2AuthnRequestBuilder nameIdPolicy(SAML2NameIDPolicyBuilder nameIDPolicy) {
+        this.authnRequestType.setNameIDPolicy(nameIDPolicy.build());
         return this;
     }
 
@@ -102,41 +88,11 @@ public class SpidSAML2AuthnRequestBuilder implements SamlProtocolExtensionsAware
         return this;
     }
 
-    public SpidSAML2AuthnRequestBuilder subject(String subject) {
-        String sanitizedSubject = subject != null ? subject.trim() : null;
-        if (sanitizedSubject != null && !sanitizedSubject.isEmpty()) {
-            this.authnRequestType.setSubject(createSubject(sanitizedSubject));
-        }
-        return this;
-    }
-
-    private SubjectType createSubject(String value) {
-        NameIDType nameId = new NameIDType();
-        nameId.setValue(value);
-        nameId.setFormat(this.authnRequestType.getNameIDPolicy() != null ? this.authnRequestType.getNameIDPolicy().getFormat() : null);
-        SubjectType subject = new SubjectType();
-        SubjectType.STSubType subType = new SubjectType.STSubType();
-        subType.addBaseID(nameId);
-        subject.setSubType(subType);
-        return subject;
-    }
-
-    public SpidSAML2AuthnRequestBuilder requestedAuthnContext(SpidSAML2RequestedAuthnContextBuilder requestedAuthnContextBuilder) {
-        RequestedAuthnContextType requestedAuthnContext = requestedAuthnContextBuilder.build();
-
-        // Only emit the RequestedAuthnContext element if at least a ClassRef or a DeclRef is present
-        if (!requestedAuthnContext.getAuthnContextClassRef().isEmpty() ||
-            !requestedAuthnContext.getAuthnContextDeclRef().isEmpty())
-            this.authnRequestType.setRequestedAuthnContext(requestedAuthnContext);
-
-        return this;
-    }
-
     public Document toDocument() {
         try {
             AuthnRequestType authnRequestType = createAuthnRequest();
 
-            return new SAML2Request().convert(authnRequestType);
+            return new SpidSAML2Request().convert(authnRequestType);
         } catch (Exception e) {
             throw new RuntimeException("Could not convert " + authnRequestType + " to a document.", e);
         }
@@ -144,8 +100,11 @@ public class SpidSAML2AuthnRequestBuilder implements SamlProtocolExtensionsAware
 
     public AuthnRequestType createAuthnRequest() {
         AuthnRequestType res = this.authnRequestType;
+        NameIDType nameIDType = new NameIDType();
+        nameIDType.setValue(this.issuer);
 
-        res.setIssuer(issuer);
+        res.setIssuer(nameIDType);
+
         res.setDestination(URI.create(this.destination));
 
         if (! this.extensions.isEmpty()) {

@@ -19,18 +19,20 @@ package org.keycloak.broker.spid;
 import static org.keycloak.common.util.UriUtils.checkUrl;
 
 import org.keycloak.common.enums.SslRequired;
-import org.keycloak.dom.saml.v2.protocol.AuthnContextComparisonType;
 import org.keycloak.models.IdentityProviderModel;
+
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
 import org.keycloak.protocol.saml.SamlPrincipalType;
 import org.keycloak.saml.common.util.XmlKeyInfoKeyNameTransformer;
 
+/**
+ * @author Pedro Igor
+ */
 public class SpidIdentityProviderConfig extends IdentityProviderModel {
 
     public static final XmlKeyInfoKeyNameTransformer DEFAULT_XML_KEY_INFO_KEY_NAME_TRANSFORMER = XmlKeyInfoKeyNameTransformer.NONE;
 
-    public static final String ENTITY_ID = "entityId";
     public static final String ADD_EXTENSIONS_ELEMENT_WITH_KEY_INFO = "addExtensionsElementWithKeyInfo";
     public static final String BACKCHANNEL_SUPPORTED = "backchannelSupported";
     public static final String ENCRYPTION_PUBLIC_KEY = "encryptionPublicKey";
@@ -50,40 +52,12 @@ public class SpidIdentityProviderConfig extends IdentityProviderModel {
     public static final String WANT_ASSERTIONS_SIGNED = "wantAssertionsSigned";
     public static final String WANT_AUTHN_REQUESTS_SIGNED = "wantAuthnRequestsSigned";
     public static final String XML_SIG_KEY_INFO_KEY_NAME_TRANSFORMER = "xmlSigKeyInfoKeyNameTransformer";
-    public static final String ENABLED_FROM_METADATA  = "enabledFromMetadata";
-    public static final String AUTHN_CONTEXT_COMPARISON_TYPE = "authnContextComparisonType";
-    public static final String AUTHN_CONTEXT_CLASS_REFS = "authnContextClassRefs";
-    public static final String AUTHN_CONTEXT_DECL_REFS = "authnContextDeclRefs";
-    public static final String SIGN_SP_METADATA = "signSpMetadata";
-    public static final String ATTRIBUTE_CONSUMING_SERVICE_INDEX = "attributeConsumingServiceIndex";
-    public static final String ATTRIBUTE_CONSUMING_SERVICE_NAMES = "attributeConsumingServiceNames";
-    public static final String ORGANIZATION_NAMES = "organizationNames";
-    public static final String ORGANIZATION_DISPLAY_NAMES = "organizationDisplayNames";
-    public static final String ORGANIZATION_URLS = "organizationUrls";
-    public static final String OTHER_CONTACT_SP_PRIVATE = "otherContactIsSpPrivate";
-    public static final String OTHER_CONTACT_IPA_CODE = "otherContactIpaCode";
-    public static final String OTHER_CONTACT_VAT_NUMBER = "otherContactVatNumber";
-    public static final String OTHER_CONTACT_FISCAL_CODE = "otherContactFiscalCode";
-    public static final String OTHER_CONTACT_COMPANY = "otherContactCompany";
-    public static final String OTHER_CONTACT_PHONE = "otherContactPhone";
-    public static final String OTHER_CONTACT_EMAIL = "otherContactEmail";
-    public static final String BILLING_CONTACT_COMPANY = "billingContactCompany";
-    public static final String BILLING_CONTACT_PHONE = "billingContactPhone";
-    public static final String BILLING_CONTACT_EMAIL = "billingContactEmail";
 
-    public SpidIdentityProviderConfig(){
+    public SpidIdentityProviderConfig() {
     }
 
     public SpidIdentityProviderConfig(IdentityProviderModel identityProviderModel) {
         super(identityProviderModel);
-    }
-
-    public String getEntityId() {
-        return getConfig().get(ENTITY_ID);
-    }
-
-    public void setEntityId(String entityId) {
-        getConfig().put(ENTITY_ID, entityId);
     }
 
     public String getSingleSignOnServiceUrl() {
@@ -259,9 +233,9 @@ public class SpidIdentityProviderConfig extends IdentityProviderModel {
 
     public void setXmlSigKeyInfoKeyNameTransformer(XmlKeyInfoKeyNameTransformer xmlSigKeyInfoKeyNameTransformer) {
         getConfig().put(XML_SIG_KEY_INFO_KEY_NAME_TRANSFORMER,
-          xmlSigKeyInfoKeyNameTransformer == null
-            ? null
-            : xmlSigKeyInfoKeyNameTransformer.name());
+                xmlSigKeyInfoKeyNameTransformer == null
+                        ? null
+                        : xmlSigKeyInfoKeyNameTransformer.name());
     }
 
     public int getAllowedClockSkew() {
@@ -294,9 +268,9 @@ public class SpidIdentityProviderConfig extends IdentityProviderModel {
 
     public void setPrincipalType(SamlPrincipalType principalType) {
         getConfig().put(PRINCIPAL_TYPE,
-            principalType == null
-                ? null
-                : principalType.name());
+                principalType == null
+                        ? null
+                        : principalType.name());
     }
 
     public String getPrincipalAttribute() {
@@ -307,187 +281,11 @@ public class SpidIdentityProviderConfig extends IdentityProviderModel {
         getConfig().put(PRINCIPAL_ATTRIBUTE, principalAttribute);
     }
 
-    public boolean isEnabledFromMetadata() {
-        return Boolean.valueOf(getConfig().get(ENABLED_FROM_METADATA ));
-    }
-
-    public void setEnabledFromMetadata(boolean enabled) {
-        getConfig().put(ENABLED_FROM_METADATA , String.valueOf(enabled));
-    }
-
-    public AuthnContextComparisonType getAuthnContextComparisonType() {
-        return AuthnContextComparisonType.fromValue(getConfig().getOrDefault(AUTHN_CONTEXT_COMPARISON_TYPE, AuthnContextComparisonType.EXACT.value()));
-    }
-
-    public void setAuthnContextComparisonType(AuthnContextComparisonType authnContextComparisonType) {
-        getConfig().put(AUTHN_CONTEXT_COMPARISON_TYPE, authnContextComparisonType.value());
-    }
-
-    public String getAuthnContextClassRefs() {
-        return getConfig().get(AUTHN_CONTEXT_CLASS_REFS);
-    }
-
-    public void setAuthnContextClassRefs(String authnContextClassRefs) {
-        getConfig().put(AUTHN_CONTEXT_CLASS_REFS, authnContextClassRefs);
-    }
-
-    public String getAuthnContextDeclRefs() {
-        return getConfig().get(AUTHN_CONTEXT_DECL_REFS);
-    }
-
-    public void setAuthnContextDeclRefs(String authnContextDeclRefs) {
-        getConfig().put(AUTHN_CONTEXT_DECL_REFS, authnContextDeclRefs);
-    }
-
-    public boolean isSignSpMetadata() {
-        return Boolean.valueOf(getConfig().get(SIGN_SP_METADATA));
-    }
-
-    public void setSignSpMetadata(boolean signSpMetadata) {
-        getConfig().put(SIGN_SP_METADATA, String.valueOf(signSpMetadata));
-    }
-
-    public Integer getAttributeConsumingServiceIndex() {
-        Integer result = null;
-        String strAttributeConsumingServiceIndex = getConfig().get(ATTRIBUTE_CONSUMING_SERVICE_INDEX);
-        if (strAttributeConsumingServiceIndex != null && !strAttributeConsumingServiceIndex.isEmpty()) {
-            try {
-                result = Integer.parseInt(strAttributeConsumingServiceIndex);
-                if (result < 0) {
-                    result = null;
-                }
-            } catch (NumberFormatException e) {
-                // ignore it and use null
-            }
-        }
-        return result;
-    }
-
-    public void setAttributeConsumingServiceIndex(Integer attributeConsumingServiceIndex) {
-        if (attributeConsumingServiceIndex < 0) {
-            getConfig().remove(ATTRIBUTE_CONSUMING_SERVICE_INDEX);
-        } else {
-            getConfig().put(ATTRIBUTE_CONSUMING_SERVICE_INDEX, String.valueOf(attributeConsumingServiceIndex));
-        }
-    }
-
-    public String getAttributeConsumingServiceNames() {
-        return getConfig().get(ATTRIBUTE_CONSUMING_SERVICE_NAMES);
-    }
-
-    public void setAttributeConsumingServiceNames(String attributeConsumingServiceNames) {
-        getConfig().put(ATTRIBUTE_CONSUMING_SERVICE_NAMES, attributeConsumingServiceNames);
-    }
-
-    public String getOrganizationNames() {
-        return getConfig().get(ORGANIZATION_NAMES);
-    }
-
-    public void setOrganizationNames(String organizationNames) {
-        getConfig().put(ORGANIZATION_NAMES, organizationNames);
-    }
-
-    public String getOrganizationDisplayNames() {
-        return getConfig().get(ORGANIZATION_DISPLAY_NAMES);
-    }
-
-    public void setOrganizationDisplayNames(String organizationDisplayNames) {
-        getConfig().put(ORGANIZATION_DISPLAY_NAMES, organizationDisplayNames);
-    }
-
-    public String getOrganizationUrls() {
-        return getConfig().get(ORGANIZATION_URLS);
-    }
-
-    public void setOrganizationUrls(String organizationUrls) {
-        getConfig().put(ORGANIZATION_URLS, organizationUrls);
-    }
-
     @Override
     public void validate(RealmModel realm) {
         SslRequired sslRequired = realm.getSslRequired();
 
         checkUrl(sslRequired, getSingleLogoutServiceUrl(), SINGLE_LOGOUT_SERVICE_URL);
         checkUrl(sslRequired, getSingleSignOnServiceUrl(), SINGLE_SIGN_ON_SERVICE_URL);
-    }
-
-    public boolean isSpPrivate() {
-        return Boolean.valueOf(getConfig().get(OTHER_CONTACT_SP_PRIVATE));
-    }
-
-    public void setSpPrivate(boolean isPrivate) {
-        getConfig().put(OTHER_CONTACT_SP_PRIVATE, String.valueOf(isPrivate));
-    }
-
-    public String getIpaCode() {
-        return getConfig().get(OTHER_CONTACT_IPA_CODE);
-    }
-
-    public void setIpaCode(String ipaCode) {
-        getConfig().put(OTHER_CONTACT_IPA_CODE, ipaCode);
-    }
-
-    public String getVatNumber() {
-        return getConfig().get(OTHER_CONTACT_VAT_NUMBER);
-    }
-
-    public void setVatNumber(String vatNumber) {
-        getConfig().put(OTHER_CONTACT_VAT_NUMBER, vatNumber);
-    }
-
-    public String getFiscalCode() {
-        return getConfig().get(OTHER_CONTACT_FISCAL_CODE);
-    }
-
-    public void setFiscalCode(String fiscalCode) {
-        getConfig().put(OTHER_CONTACT_FISCAL_CODE, fiscalCode);
-    }
-
-    public String getOtherContactEmail() {
-        return getConfig().get(OTHER_CONTACT_EMAIL);
-    }
-
-    public String getOtherContactCompany() {
-        return getConfig().get(OTHER_CONTACT_COMPANY);
-    }
-
-    public String getOtherContactPhone() {
-        return getConfig().get(OTHER_CONTACT_PHONE);
-    }
-
-    public void setOtherContactEmail(String contactEmail) {
-        getConfig().put(OTHER_CONTACT_EMAIL, contactEmail);
-    }
-
-    public void setOtherContactCompany(String contactCompany) {
-        getConfig().put(OTHER_CONTACT_COMPANY, contactCompany);
-    }
-
-    public void setOtherContactPhone(String contactPhone) {
-        getConfig().put(OTHER_CONTACT_PHONE, contactPhone);
-    }
-
-    public String getBillingContactEmail() {
-        return getConfig().get(BILLING_CONTACT_EMAIL);
-    }
-
-    public String getBillingContactCompany() {
-        return getConfig().get(BILLING_CONTACT_COMPANY);
-    }
-
-    public String getBillingContactPhone() {
-        return getConfig().get(BILLING_CONTACT_PHONE);
-    }
-
-    public void setBillingContactEmail(String contactEmail) {
-        getConfig().put(BILLING_CONTACT_EMAIL, contactEmail);
-    }
-
-    public void setBillingContactCompany(String contactCompany) {
-        getConfig().put(BILLING_CONTACT_COMPANY, contactCompany);
-    }
-    
-    public void setBillingContactPhone(String contactPhone) {
-        getConfig().put(BILLING_CONTACT_PHONE, contactPhone);
     }
 }

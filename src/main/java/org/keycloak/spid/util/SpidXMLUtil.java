@@ -1,4 +1,4 @@
-package it.redhat.spid;
+package org.keycloak.spid.util;
 
 import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
@@ -17,7 +17,7 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.io.StringWriter;
 
-public class XMLUtil {
+public class SpidXMLUtil {
 
     public static String prettify(String xml) {
 

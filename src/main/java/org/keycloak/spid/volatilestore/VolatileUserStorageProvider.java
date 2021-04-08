@@ -1,4 +1,4 @@
-package it.redhat.spid.volatilestore;
+package org.keycloak.spid.volatilestore;
 
 import org.keycloak.common.util.EnvUtil;
 import org.keycloak.component.ComponentModel;

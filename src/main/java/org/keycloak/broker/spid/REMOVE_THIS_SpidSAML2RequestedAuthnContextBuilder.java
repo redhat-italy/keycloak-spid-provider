@@ -22,29 +22,29 @@ import org.keycloak.dom.saml.v2.protocol.RequestedAuthnContextType;
 import java.util.LinkedList;
 import java.util.List;
 
-public class SpidSAML2RequestedAuthnContextBuilder {
+public class REMOVE_THIS_SpidSAML2RequestedAuthnContextBuilder {
     private final RequestedAuthnContextType requestedAuthnContextType;
     private AuthnContextComparisonType comparison;
     private List<String> requestedAuthnContextClassRefList;
     private List<String> requestedAuthnContextDeclRefList;
 
-    public SpidSAML2RequestedAuthnContextBuilder() {
+    public REMOVE_THIS_SpidSAML2RequestedAuthnContextBuilder() {
         this.requestedAuthnContextType = new RequestedAuthnContextType();
         this.requestedAuthnContextClassRefList = new LinkedList<String>();
         this.requestedAuthnContextDeclRefList = new LinkedList<String>();
     }
 
-    public SpidSAML2RequestedAuthnContextBuilder setComparison(AuthnContextComparisonType comparison) {
+    public REMOVE_THIS_SpidSAML2RequestedAuthnContextBuilder setComparison(AuthnContextComparisonType comparison) {
         this.comparison = comparison;
         return this;
     }
 
-    public SpidSAML2RequestedAuthnContextBuilder addAuthnContextClassRef(String authnContextClassRef) {
+    public REMOVE_THIS_SpidSAML2RequestedAuthnContextBuilder addAuthnContextClassRef(String authnContextClassRef) {
         this.requestedAuthnContextClassRefList.add(authnContextClassRef);
         return this;
     }
 
-    public SpidSAML2RequestedAuthnContextBuilder addAuthnContextDeclRef(String authnContextDeclRef) {
+    public REMOVE_THIS_SpidSAML2RequestedAuthnContextBuilder addAuthnContextDeclRef(String authnContextDeclRef) {
         this.requestedAuthnContextDeclRefList.add(authnContextDeclRef);
         return this;
     }

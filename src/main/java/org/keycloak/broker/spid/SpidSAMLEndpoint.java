@@ -257,15 +257,9 @@ public class SpidSAMLEndpoint {
             SAMLDocumentHolder holder = extractRequestDocument(samlRequest);
             RequestAbstractType requestAbstractType = (RequestAbstractType) holder.getSamlObject();
             // validate destination
-            if (requestAbstractType.getDestination() == null && containsUnencryptedSignature(holder)) {
-                event.event(EventType.IDENTITY_PROVIDER_RESPONSE);
-                event.detail(Details.REASON, Errors.MISSING_REQUIRED_DESTINATION);
-                event.error(Errors.INVALID_REQUEST);
-                return ErrorPage.error(session, null, Response.Status.BAD_REQUEST, Messages.INVALID_REQUEST);
-            }
             if (! destinationValidator.validate(session.getContext().getUri().getAbsolutePath(), requestAbstractType.getDestination())) {
                 event.event(EventType.IDENTITY_PROVIDER_RESPONSE);
-                event.detail(Details.REASON, Errors.INVALID_DESTINATION);
+                event.detail(Details.REASON, "invalid_destination");
                 event.error(Errors.INVALID_SAML_RESPONSE);
                 return ErrorPage.error(session, null, Response.Status.BAD_REQUEST, Messages.INVALID_REQUEST);
             }
@@ -341,7 +335,7 @@ public class SpidSAMLEndpoint {
             builder.destination(config.getSingleLogoutServiceUrl());
             builder.issuer(issuerURL);
             JaxrsSAML2BindingBuilder binding = new JaxrsSAML2BindingBuilder(session)
-                        .relayState(relayState);
+                    .relayState(relayState);
             boolean postBinding = config.isPostBindingLogout();
             if (config.isWantAuthnRequestsSigned()) {
                 KeyManager.ActiveRsaKey keys = session.keys().getActiveRsaKey(realm);
@@ -370,12 +364,7 @@ public class SpidSAMLEndpoint {
         }
 
         private String getEntityId(UriInfo uriInfo, RealmModel realm) {
-            String configEntityId = config.getEntityId();
-
-            if (configEntityId == null || configEntityId.isEmpty())
-                return UriBuilder.fromUri(uriInfo.getBaseUri()).path("realms").path(realm.getName()).build().toString();
-            else
-                return configEntityId;
+            return UriBuilder.fromUri(uriInfo.getBaseUri()).path("realms").path(realm.getName()).build().toString();
         }
 
         protected Response handleLoginResponse(String samlResponse, SAMLDocumentHolder holder, ResponseType responseType, String relayState, String clientId) {
@@ -423,7 +412,10 @@ public class SpidSAMLEndpoint {
                 }
 
                 AssertionType assertion = responseType.getAssertions().get(0).getAssertion();
-                NameIDType subjectNameID = getSubjectNameID(assertion);
+
+                SubjectType subject = assertion.getSubject();
+                SubjectType.STSubType subType = subject.getSubType();
+                NameIDType subjectNameID = (NameIDType) subType.getBaseID();
                 String principal = getPrincipal(assertion);
 
                 if (principal == null) {
@@ -444,7 +436,7 @@ public class SpidSAMLEndpoint {
                 identity.setUsername(principal);
 
                 //SAML Spec 2.2.2 Format is optional
-                if (subjectNameID != null && subjectNameID.getFormat() != null && subjectNameID.getFormat().toString().equals(JBossSAMLURIConstants.NAMEID_FORMAT_EMAIL.get())) {
+                if (subjectNameID.getFormat() != null && subjectNameID.getFormat().toString().equals(JBossSAMLURIConstants.NAMEID_FORMAT_EMAIL.get())) {
                     identity.setEmail(subjectNameID.getValue());
                 }
 
@@ -491,7 +483,7 @@ public class SpidSAMLEndpoint {
                 identity.setIdp(provider);
                 if (authn != null && authn.getSessionIndex() != null) {
                     identity.setBrokerSessionId(identity.getBrokerUserId() + "." + authn.getSessionIndex());
-                 }
+                }
                 identity.setCode(relayState);
 
 
@@ -506,10 +498,10 @@ public class SpidSAMLEndpoint {
 
         private boolean isSuccessfulSamlResponse(ResponseType responseType) {
             return responseType != null
-              && responseType.getStatus() != null
-              && responseType.getStatus().getStatusCode() != null
-              && responseType.getStatus().getStatusCode().getValue() != null
-              && Objects.equals(responseType.getStatus().getStatusCode().getValue().toString(), JBossSAMLURIConstants.STATUS_SUCCESS.get());
+                    && responseType.getStatus() != null
+                    && responseType.getStatus().getStatusCode() != null
+                    && responseType.getStatus().getStatusCode().getValue() != null
+                    && Objects.equals(responseType.getStatus().getStatusCode().getValue().toString(), JBossSAMLURIConstants.STATUS_SUCCESS.get());
         }
 
 
@@ -517,23 +509,17 @@ public class SpidSAMLEndpoint {
             SAMLDocumentHolder holder = extractResponseDocument(samlResponse);
             if (holder == null) {
                 event.event(EventType.IDENTITY_PROVIDER_RESPONSE);
-                event.detail(Details.REASON, Errors.INVALID_SAML_DOCUMENT);
+                event.detail(Details.REASON, "invalid_saml_document");
                 event.error(Errors.INVALID_SAML_RESPONSE);
                 return ErrorPage.error(session, null, Response.Status.BAD_REQUEST, Messages.INVALID_FEDERATED_IDENTITY_ACTION);
             }
             StatusResponseType statusResponse = (StatusResponseType)holder.getSamlObject();
             // validate destination
-            if (statusResponse.getDestination() == null && containsUnencryptedSignature(holder)) {
-                event.event(EventType.IDENTITY_PROVIDER_RESPONSE);
-                event.detail(Details.REASON, Errors.MISSING_REQUIRED_DESTINATION);
-                event.error(Errors.INVALID_SAML_LOGOUT_RESPONSE);
-                return ErrorPage.error(session, null, Response.Status.BAD_REQUEST, Messages.INVALID_REQUEST);
-            }
             if (! destinationValidator.validate(session.getContext().getUri().getAbsolutePath(), statusResponse.getDestination())) {
                 event.event(EventType.IDENTITY_PROVIDER_RESPONSE);
-                event.detail(Details.REASON, Errors.INVALID_DESTINATION);
+                event.detail(Details.REASON, "invalid_destination");
                 event.error(Errors.INVALID_SAML_RESPONSE);
-                return ErrorPage.error(session, null, Response.Status.BAD_REQUEST, Messages.INVALID_REQUEST);
+                return ErrorPage.error(session, null, Response.Status.BAD_REQUEST, Messages.INVALID_FEDERATED_IDENTITY_ACTION);
             }
             if (config.isValidateSignature()) {
                 try {
@@ -673,8 +659,10 @@ public class SpidSAMLEndpoint {
         SamlPrincipalType principalType = config.getPrincipalType();
 
         if (principalType == null || principalType.equals(SamlPrincipalType.SUBJECT)) {
-            NameIDType subjectNameID = getSubjectNameID(assertion);
-            return subjectNameID != null ? subjectNameID.getValue() : null;
+            SubjectType subject = assertion.getSubject();
+            SubjectType.STSubType subType = subject.getSubType();
+            NameIDType subjectNameID = (NameIDType) subType.getBaseID();
+            return subjectNameID.getValue();
         } else if (principalType.equals(SamlPrincipalType.ATTRIBUTE)) {
             return getAttributeByName(assertion, config.getPrincipalAttribute());
         } else {
@@ -709,9 +697,4 @@ public class SpidSAMLEndpoint {
         }
     }
 
-    private NameIDType getSubjectNameID(final AssertionType assertion) {
-        SubjectType subject = assertion.getSubject();
-        SubjectType.STSubType subType = subject.getSubType();
-        return subType != null ? (NameIDType) subType.getBaseID() : null;
-    }
 }

@@ -1,1 +1,1 @@
-it.redhat.spid.volatilestore.VolatileUserStorageProviderFactory
+org.keycloak.spid.volatilestore.VolatileUserStorageProviderFactory

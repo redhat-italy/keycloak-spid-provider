@@ -20,32 +20,32 @@ import org.keycloak.dom.saml.v2.assertion.NameIDType;
 
 import java.net.URI;
 
-public class SAML2NameIDBuilder {
+public class REMOVE_THIS_SAML2NameIDBuilder {
     private final NameIDType nameIdType;
     private String format;
     private String nameQualifier;
     private String spNameQualifier;
 
-    private SAML2NameIDBuilder(String value) {
+    private REMOVE_THIS_SAML2NameIDBuilder(String value) {
         this.nameIdType = new NameIDType();
         this.nameIdType.setValue(value);
     }
 
-    public static SAML2NameIDBuilder value(String value) {
-        return new SAML2NameIDBuilder(value);
+    public static REMOVE_THIS_SAML2NameIDBuilder value(String value) {
+        return new REMOVE_THIS_SAML2NameIDBuilder(value);
     }
 
-    public SAML2NameIDBuilder setFormat(String format) {
+    public REMOVE_THIS_SAML2NameIDBuilder setFormat(String format) {
         this.format = format;
         return this;
     }
 
-    public SAML2NameIDBuilder setNameQualifier(String nameQualifier) {
+    public REMOVE_THIS_SAML2NameIDBuilder setNameQualifier(String nameQualifier) {
         this.nameQualifier = nameQualifier;
         return this;
     }
 
-    public SAML2NameIDBuilder setSPNameQualifier(String spNameQualifier) {
+    public REMOVE_THIS_SAML2NameIDBuilder setSPNameQualifier(String spNameQualifier) {
         this.spNameQualifier = spNameQualifier;
         return this;
     }

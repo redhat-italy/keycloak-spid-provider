@@ -1,4 +1,4 @@
-package it.redhat.spid.volatilestore;
+package org.keycloak.spid.volatilestore;
 
 import org.jboss.logging.Logger;
 import org.keycloak.component.ComponentModel;
