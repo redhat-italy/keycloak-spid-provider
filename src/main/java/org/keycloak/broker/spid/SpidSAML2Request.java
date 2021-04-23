@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.keycloak.saml;
+package org.keycloak.broker.spid;
 
 import org.keycloak.dom.saml.v2.SAML2Object;
 import org.keycloak.dom.saml.v2.assertion.NameIDType;
@@ -39,6 +39,7 @@ import org.keycloak.saml.processing.core.saml.v2.common.SAMLDocumentHolder;
 import org.keycloak.saml.processing.core.saml.v2.util.XMLTimeUtil;
 import org.keycloak.saml.processing.core.saml.v2.writers.SAMLResponseWriter;
 import org.keycloak.saml.processing.core.util.JAXPValidationUtil;
+
 import org.w3c.dom.Document;
 
 import javax.xml.datatype.XMLGregorianCalendar;
@@ -49,13 +50,12 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Writer;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 
 /**
  * API for SAML2 Request
  *
- * @author Anil.Saldhana@redhat.com
- * @since Jan 5, 2009
  */
 public class SpidSAML2Request {
 
@@ -96,7 +96,7 @@ public class SpidSAML2Request {
      * @param assertionConsumerURL
      * @param destination
      * @param issuerValue
-     * @param protocolBindingUri
+     * @param protocolBinding
      *
      * @return
      *
@@ -118,6 +118,15 @@ public class SpidSAML2Request {
         issuer.setValue(issuerValue);
 
         authnRequest.setIssuer(issuer);
+
+        // SPID-UPDATE add issuer format
+        try {
+            authnRequest.getIssuer().setFormat(new URI("urn:oasis:names:tc:SAML:2.0:nameid-format:entity"));
+        } catch (URISyntaxException e) {
+            e.printStackTrace();
+            throw new ConfigurationException(e);
+        }
+        // END-OF-SPID-UPDATE
 
         // Create a default NameIDPolicy
         NameIDPolicyType nameIDPolicy = new NameIDPolicyType();
@@ -289,7 +298,9 @@ public class SpidSAML2Request {
             writer.write((LogoutRequestType) rat);
         }
 
-        return DocumentUtil.getDocument(new String(bos.toByteArray(), GeneralConstants.SAML_CHARSET));
+        String requestSaml = new String(bos.toByteArray(), GeneralConstants.SAML_CHARSET);
+
+        return DocumentUtil.getDocument(requestSaml);
     }
 
     /**

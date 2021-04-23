@@ -14,22 +14,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.keycloak.saml;
+package org.keycloak.broker.spid;
 
 import org.keycloak.dom.saml.v2.assertion.NameIDType;
 import org.keycloak.dom.saml.v2.protocol.AuthnRequestType;
-import org.keycloak.saml.processing.api.saml.v2.request.SAML2Request;
 import org.keycloak.saml.processing.core.saml.v2.common.IDGenerator;
 import org.keycloak.saml.processing.core.saml.v2.util.XMLTimeUtil;
+import org.keycloak.saml.SAML2NameIDPolicyBuilder;
+import org.keycloak.saml.SamlProtocolExtensionsAwareBuilder;
 import org.w3c.dom.Document;
 
+import java.net.MalformedURLException;
 import java.net.URI;
+import java.net.URL;
 import java.util.LinkedList;
 import java.util.List;
+
 import org.keycloak.dom.saml.v2.protocol.ExtensionsType;
 
 /**
- * @author pedroigor
  */
 public class SpidSAML2AuthnRequestBuilder implements SamlProtocolExtensionsAwareBuilder<SpidSAML2AuthnRequestBuilder> {
 
@@ -105,7 +108,10 @@ public class SpidSAML2AuthnRequestBuilder implements SamlProtocolExtensionsAware
 
         res.setIssuer(nameIDType);
 
-        res.setDestination(URI.create(this.destination));
+        // SPID-UPDATE
+        // REPLACED res.setDestination(URI.create(this.destination));
+        String hostDestination = getDestinationHost(this.destination);
+        res.setDestination(URI.create(hostDestination));
 
         if (! this.extensions.isEmpty()) {
             ExtensionsType extensionsType = new ExtensionsType();
@@ -116,5 +122,26 @@ public class SpidSAML2AuthnRequestBuilder implements SamlProtocolExtensionsAware
         }
 
         return res;
+    }
+
+    // SPID-UPDATE (added method)
+    private String getDestinationHost(String destination) {
+
+        try {
+            URL url = new URL(destination);
+            String hostAndProtocol = url.getProtocol() + "://" + url.getHost();
+
+            if (url.getPort() > 0) {
+                return hostAndProtocol + ":" + url.getPort();
+            }
+
+            return hostAndProtocol;
+
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+            // TODO
+        }
+
+        return destination;
     }
 }

@@ -40,7 +40,6 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * @author Pedro Igor
  */
 public class SpidIdentityProviderFactory extends AbstractIdentityProviderFactory<SpidIdentityProvider> {
 

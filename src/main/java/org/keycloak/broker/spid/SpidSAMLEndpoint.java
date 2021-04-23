@@ -103,8 +103,6 @@ import javax.xml.crypto.dsig.XMLSignature;
 import org.w3c.dom.NodeList;
 
 /**
- * @author <a href="mailto:bill@burkecentral.com">Bill Burke</a>
- * @version $Revision: 1 $
  */
 public class SpidSAMLEndpoint {
     protected static final Logger logger = Logger.getLogger(SpidSAMLEndpoint.class);
@@ -371,7 +369,7 @@ public class SpidSAMLEndpoint {
 
             try {
                 KeyManager.ActiveRsaKey keys = session.keys().getActiveRsaKey(realm);
-                if (! isSuccessfulSamlResponse(responseType)) {
+                if (!isSuccessfulSamlResponse(responseType)) {
                     String statusMessage = responseType.getStatus() == null ? Messages.IDENTITY_PROVIDER_UNEXPECTED_ERROR : responseType.getStatus().getStatusMessage();
                     return callback.error(relayState, statusMessage);
                 }
@@ -435,6 +433,30 @@ public class SpidSAMLEndpoint {
 
                 identity.setUsername(principal);
 
+                // SPID-UPDATE
+                // set username with spidCode
+                Set<AttributeStatementType> attributeStatements = assertion.getAttributeStatements();
+                for (AttributeStatementType next : attributeStatements) {
+                    List<AttributeStatementType.ASTChoiceType> attributes = next.getAttributes();
+                    for (AttributeStatementType.ASTChoiceType astChoiceType : attributes) {
+                        String name = astChoiceType.getAttribute().getName();
+                        if (name.equals("spidCode")) {
+                            //identity.setUsername(astChoiceType.getAttribute().getAttributeValue().get(0).toString());
+                        }
+
+                        if (name.equals("email")) {
+                            identity.setEmail(astChoiceType.getAttribute().getAttributeValue().get(0).toString());
+                        }
+
+                    }
+                }
+
+                // Static set(s) for flawless login
+                identity.setName("Name");
+                identity.setFirstName("First Name");
+                identity.setLastName("Last Name");
+                // END-OF-SPID-UPDATE
+
                 //SAML Spec 2.2.2 Format is optional
                 if (subjectNameID.getFormat() != null && subjectNameID.getFormat().toString().equals(JBossSAMLURIConstants.NAMEID_FORMAT_EMAIL.get())) {
                     identity.setEmail(subjectNameID.getValue());
@@ -466,7 +488,7 @@ public class SpidSAMLEndpoint {
                 AuthnStatementType authn = null;
                 for (Object statement : assertion.getStatements()) {
                     if (statement instanceof AuthnStatementType) {
-                        authn = (AuthnStatementType)statement;
+                        authn = (AuthnStatementType) statement;
                         identity.getContextData().put(SAML_AUTHN_STATEMENT, authn);
                         break;
                     }

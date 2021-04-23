@@ -1,8 +1,8 @@
 package org.keycloak.broker.spid.tests;
 
-import org.keycloak.saml.SpidSAML2AuthnRequestBuilder;
 import org.junit.Assert;
 import org.junit.Test;
+import org.keycloak.broker.spid.SpidSAML2AuthnRequestBuilder;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 
@@ -81,7 +81,7 @@ public class SpidSAML2AuthnRequestBuilderTest {
 
         Node request_destination = doc.getFirstChild().getAttributes().getNamedItem("Destination");
 
-        Assert.assertEquals("http://test.server.mock:8088/sso", request_destination.getTextContent());
+        Assert.assertEquals("http://test.server.mock:8088", request_destination.getTextContent());
     }
 
     @Test
@@ -96,7 +96,7 @@ public class SpidSAML2AuthnRequestBuilderTest {
 
         Node request_destination = doc.getFirstChild().getAttributes().getNamedItem("Destination");
 
-        Assert.assertEquals("https://test.server.mock:8488/sso", request_destination.getTextContent());
+        Assert.assertEquals("https://test.server.mock:8488", request_destination.getTextContent());
     }
 
     @Test
@@ -111,7 +111,7 @@ public class SpidSAML2AuthnRequestBuilderTest {
 
         Node request_destination = doc.getFirstChild().getAttributes().getNamedItem("Destination");
 
-        Assert.assertEquals("http://test.server.mock/sso", request_destination.getTextContent());
+        Assert.assertEquals("http://test.server.mock", request_destination.getTextContent());
     }
 
     @Test
@@ -126,6 +126,6 @@ public class SpidSAML2AuthnRequestBuilderTest {
 
         Node request_destination = doc.getFirstChild().getAttributes().getNamedItem("Destination");
 
-        Assert.assertEquals("https://test.server.mock/sso", request_destination.getTextContent());
+        Assert.assertEquals("https://test.server.mock", request_destination.getTextContent());
     }
 }

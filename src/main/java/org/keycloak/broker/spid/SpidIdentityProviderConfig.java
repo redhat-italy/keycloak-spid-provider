@@ -27,7 +27,6 @@ import org.keycloak.protocol.saml.SamlPrincipalType;
 import org.keycloak.saml.common.util.XmlKeyInfoKeyNameTransformer;
 
 /**
- * @author Pedro Igor
  */
 public class SpidIdentityProviderConfig extends IdentityProviderModel {
 
@@ -94,7 +93,6 @@ public class SpidIdentityProviderConfig extends IdentityProviderModel {
 
     /**
      * @deprecated Prefer {@link #getSigningCertificates()}}
-     * @param signingCertificate
      */
     public String getSigningCertificate() {
         return getConfig().get(SIGNING_CERTIFICATE_KEY);
@@ -130,10 +128,14 @@ public class SpidIdentityProviderConfig extends IdentityProviderModel {
     }
 
     public String getNameIDPolicyFormat() {
+        // SPID-UPDATE
+        // REPLACED LINE: return "urn:oasis:names:tc:SAML:2.0:nameid-format:transient";
         return getConfig().get(NAME_ID_POLICY_FORMAT);
     }
 
     public void setNameIDPolicyFormat(String nameIDPolicyFormat) {
+        // SPID-UPDATE
+        // REPLACED LINE: getConfig().put(NAME_ID_POLICY_FORMAT, "urn:oasis:names:tc:SAML:2.0:nameid-format:transient");
         getConfig().put(NAME_ID_POLICY_FORMAT, nameIDPolicyFormat);
     }
 

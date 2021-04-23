@@ -28,16 +28,14 @@ import org.keycloak.saml.common.exceptions.ParsingException;
 import org.keycloak.saml.common.exceptions.ProcessingException;
 import org.keycloak.saml.common.util.StaxUtil;
 import org.keycloak.saml.processing.core.parsers.saml.SAMLParser;
-import org.keycloak.saml.processing.core.saml.v2.writers.SAMLAssertionWriter;
-import org.keycloak.saml.processing.core.saml.v2.writers.SAMLResponseWriter;
-import org.keycloak.spid.util.SpidXMLUtil;
+import org.keycloak.broker.spid.util.SpidXMLUtil;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 
 /**
- * @author <a href="mailto:mposolda@redhat.com">Marek Posolda</a>
+ *
  */
 public class SpidSAMLDataMarshaller extends DefaultDataMarshaller {
     protected static final Logger logger = Logger.getLogger(SpidSAMLDataMarshaller.class);
@@ -52,15 +50,15 @@ public class SpidSAMLDataMarshaller extends DefaultDataMarshaller {
             try {
                 if (obj instanceof ResponseType) {
                     ResponseType responseType = (ResponseType) obj;
-                    SAMLResponseWriter samlWriter = new SAMLResponseWriter(StaxUtil.getXMLStreamWriter(bos));
+                    SpidSAMLResponseWriter samlWriter = new SpidSAMLResponseWriter(StaxUtil.getXMLStreamWriter(bos));
                     samlWriter.write(responseType, true);
                 } else if (obj instanceof AssertionType) {
                     AssertionType assertion = (AssertionType) obj;
-                    SAMLAssertionWriter samlWriter = new SAMLAssertionWriter(StaxUtil.getXMLStreamWriter(bos));
+                    SpidSAMLAssertionWriter samlWriter = new SpidSAMLAssertionWriter(StaxUtil.getXMLStreamWriter(bos));
                     samlWriter.write(assertion, true);
                 } else if (obj instanceof AuthnStatementType) {
                     AuthnStatementType authnStatement = (AuthnStatementType) obj;
-                    SAMLAssertionWriter samlWriter = new SAMLAssertionWriter(StaxUtil.getXMLStreamWriter(bos));
+                    SpidSAMLAssertionWriter samlWriter = new SpidSAMLAssertionWriter(StaxUtil.getXMLStreamWriter(bos));
                     samlWriter.write(authnStatement, true);
                 } else {
                     throw new IllegalArgumentException("Don't know how to serialize object of type " + obj.getClass().getName());
@@ -80,12 +78,14 @@ public class SpidSAMLDataMarshaller extends DefaultDataMarshaller {
         if (clazz.getName().startsWith("org.keycloak.dom.saml")) {
             String xmlString = serialized;
 
+            // SPID-UPDATE
             if (logger.isDebugEnabled()) {
                 logger.debug("=====================================================================================");
                 logger.debug("=====================================================================================");
                 logger.debug("=====================================================================================");
                 logger.debug(SpidXMLUtil.prettify(xmlString));
             }
+            // END-OF-SPID-UPDATE
 
             try {
                 if (clazz.equals(ResponseType.class) || clazz.equals(AssertionType.class) || clazz.equals(AuthnStatementType.class)) {

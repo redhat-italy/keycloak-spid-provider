@@ -6,14 +6,14 @@
   -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    <groupId>com.github.lscorcia</groupId>
+    <groupId>com.redhat.spid</groupId>
     <artifactId>keycloak-spid-provider</artifactId>
-    <version>1.0.8-SNAPSHOT</version>
+    <version>2.0-kc9.0.3</version>
     <packaging>jar</packaging>
 
     <name>Keycloak SPID Service Provider</name>
     <description>A Keycloak Service Provider for the Italian SPID Federation</description>
-    <url>https://github.com/lscorcia/keycloak-spid-provider</url>
+    <url>https://github.com/redhat-italy/keycloak-spid-provider</url>
 
     <properties>
         <maven.compiler.source>1.8</maven.compiler.source>
@@ -21,14 +21,14 @@
         <failOnMissingWebXml>false</failOnMissingWebXml>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
-        <!--version.keycloak>9.0.11.redhat-00001</version.keycloak-->
-        <version.keycloak>9.0.3</version.keycloak>
+        <!--keycloak.version>9.0.11.redhat-00001</keycloak.version-->
+        <keycloak.version>9.0.3</keycloak.version>
         <slf4j-api.version>1.7.30</slf4j-api.version>
         <junit.version>4.12</junit.version>
     </properties>
 
     <scm>
-        <developerConnection>scm:git:https://github.com/lscorcia/keycloak-spid-provider.git</developerConnection>
+        <developerConnection>scm:git:https://github.com/redhat-italy/keycloak-spid-provider.git</developerConnection>
         <tag>HEAD</tag>
     </scm>
 
@@ -37,7 +37,7 @@
              <dependency>
                 <groupId>org.keycloak.bom</groupId>
                 <artifactId>keycloak-misc-bom</artifactId>
-                <version>${version.keycloak}</version>
+                <version>${keycloak.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
 
@@ -49,37 +49,37 @@
         <dependency>
             <groupId>org.keycloak</groupId>
             <artifactId>keycloak-core</artifactId>
-            <version>${version.keycloak}</version>
+            <version>${keycloak.version}</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.keycloak</groupId>
             <artifactId>keycloak-saml-core</artifactId>
-            <version>${version.keycloak}</version>
+            <version>${keycloak.version}</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.keycloak</groupId>
             <artifactId>keycloak-saml-adapter-api-public</artifactId>
-            <version>${version.keycloak}</version>
+            <version>${keycloak.version}</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.keycloak</groupId>
             <artifactId>keycloak-server-spi</artifactId>
-            <version>${version.keycloak}</version>
+            <version>${keycloak.version}</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.keycloak</groupId>
             <artifactId>keycloak-server-spi-private</artifactId>
-            <version>${version.keycloak}</version>
+            <version>${keycloak.version}</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.keycloak</groupId>
             <artifactId>keycloak-services</artifactId>
-            <version>${version.keycloak}</version>
+            <version>${keycloak.version}</version>
             <scope>provided</scope>
         </dependency>
         <dependency>

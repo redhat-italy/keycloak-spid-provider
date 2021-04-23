@@ -1,4 +1,4 @@
-package org.keycloak.spid.util;
+package org.keycloak.broker.spid.util;
 
 import org.w3c.dom.Document;
 import org.xml.sax.InputSource;

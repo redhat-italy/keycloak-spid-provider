@@ -55,7 +55,6 @@ import java.util.Set;
 import java.util.TreeSet;
 
 /**
- * @author Pedro Igor
  */
 public class SpidIdentityProvider extends AbstractIdentityProvider<SpidIdentityProviderConfig> {
     protected static final Logger logger = Logger.getLogger(SpidIdentityProvider.class);
@@ -105,12 +104,22 @@ public class SpidIdentityProvider extends AbstractIdentityProvider<SpidIdentityP
             if (getConfig().isWantAuthnRequestsSigned()) {
                 KeyManager.ActiveRsaKey keys = session.keys().getActiveRsaKey(realm);
 
-                KeyPair keypair = new KeyPair(keys.getPublicKey(), keys.getPrivateKey());
-
+                // SPID-UPDATE: replaced signing lines, to solve:
+                // SAML Client - AuthnRequest signature does not contain X509Data (https://issues.redhat.com/browse/KEYCLOAK-13698)
+                // with pull request: https://github.com/keycloak/keycloak/pull/6957
+                // and commit reference: https://github.com/keycloak/keycloak/pull/6957/commits/a19738d8e0d41f76734c238b02d063d960c40d05
+                // Removed the next 5 lines:
+                // KeyPair keypair = new KeyPair(keys.getPublicKey(), keys.getPrivateKey());
+                // String keyName = getConfig().getXmlSigKeyInfoKeyNameTransformer().getKeyName(keys.getKid(), keys.getCertificate());
+                // binding.signWith(keyName, keypair);
+                // binding.signatureAlgorithm(getSignatureAlgorithm());
+                // binding.signDocument();
+                // Replaced with the next 2 lines:
                 String keyName = getConfig().getXmlSigKeyInfoKeyNameTransformer().getKeyName(keys.getKid(), keys.getCertificate());
-                binding.signWith(keyName, keypair);
-                binding.signatureAlgorithm(getSignatureAlgorithm());
-                binding.signDocument();
+                binding.signWith(keyName, keys.getPrivateKey(), keys.getPublicKey(), keys.getCertificate())
+                        .signatureAlgorithm(getSignatureAlgorithm())
+                        .signDocument();
+
                 if (! postBinding && getConfig().isAddExtensionsElementWithKeyInfo()) {    // Only include extension if REDIRECT binding and signing whole SAML protocol message
                     authnRequestBuilder.addExtension(new KeycloakKeySamlExtensionGenerator(keyName));
                 }
