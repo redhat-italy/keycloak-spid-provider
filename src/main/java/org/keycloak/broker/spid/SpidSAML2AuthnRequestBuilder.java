@@ -18,9 +18,9 @@ package org.keycloak.broker.spid;
 
 import org.keycloak.dom.saml.v2.assertion.NameIDType;
 import org.keycloak.dom.saml.v2.protocol.AuthnRequestType;
+import org.keycloak.dom.saml.v2.protocol.RequestedAuthnContextType;
 import org.keycloak.saml.processing.core.saml.v2.common.IDGenerator;
 import org.keycloak.saml.processing.core.saml.v2.util.XMLTimeUtil;
-import org.keycloak.saml.SAML2NameIDPolicyBuilder;
 import org.keycloak.saml.SamlProtocolExtensionsAwareBuilder;
 import org.w3c.dom.Document;
 
@@ -38,7 +38,7 @@ public class SpidSAML2AuthnRequestBuilder implements SamlProtocolExtensionsAware
 
     private final AuthnRequestType authnRequestType;
     protected String destination;
-    protected String issuer;
+    protected NameIDType issuer;  // SPID-UPDATE changed type from String to NameIDType (as in keycloak v.12.0.0)
     protected final List<NodeGenerator> extensions = new LinkedList<>();
 
     public SpidSAML2AuthnRequestBuilder destination(String destination) {
@@ -46,9 +46,13 @@ public class SpidSAML2AuthnRequestBuilder implements SamlProtocolExtensionsAware
         return this;
     }
 
-    public SpidSAML2AuthnRequestBuilder issuer(String issuer) {
+    public SpidSAML2AuthnRequestBuilder issuer(NameIDType issuer) {
         this.issuer = issuer;
         return this;
+    }
+
+    public SpidSAML2AuthnRequestBuilder issuer(String issuer) {
+        return issuer(SAML2NameIDBuilder.value(issuer).build());
     }
 
     @Override
@@ -71,6 +75,11 @@ public class SpidSAML2AuthnRequestBuilder implements SamlProtocolExtensionsAware
         return this;
     }
 
+    public SpidSAML2AuthnRequestBuilder attributeConsumingServiceIndex(Integer attributeConsumingServiceIndex) {
+        this.authnRequestType.setAttributeConsumingServiceIndex(attributeConsumingServiceIndex);
+        return this;
+    }
+
     public SpidSAML2AuthnRequestBuilder forceAuthn(boolean forceAuthn) {
         this.authnRequestType.setForceAuthn(forceAuthn);
         return this;
@@ -81,13 +90,30 @@ public class SpidSAML2AuthnRequestBuilder implements SamlProtocolExtensionsAware
         return this;
     }
 
-    public SpidSAML2AuthnRequestBuilder nameIdPolicy(SAML2NameIDPolicyBuilder nameIDPolicy) {
-        this.authnRequestType.setNameIDPolicy(nameIDPolicy.build());
+    // SPID-UPDATE extra method required to forse null on isPassive value, to avoid adding the element in the xml
+    public SpidSAML2AuthnRequestBuilder isPassive(Boolean isPassive) {
+        this.authnRequestType.setIsPassive(isPassive);
+        return this;
+    }
+
+    public SpidSAML2AuthnRequestBuilder nameIdPolicy(SpidSAML2NameIDPolicyBuilder nameIDPolicyBuilder) {
+        this.authnRequestType.setNameIDPolicy(nameIDPolicyBuilder.build());
         return this;
     }
 
     public SpidSAML2AuthnRequestBuilder protocolBinding(String protocolBinding) {
         this.authnRequestType.setProtocolBinding(URI.create(protocolBinding));
+        return this;
+    }
+
+    public SpidSAML2AuthnRequestBuilder requestedAuthnContext(SAML2RequestedAuthnContextBuilder requestedAuthnContextBuilder) {
+        RequestedAuthnContextType requestedAuthnContext = requestedAuthnContextBuilder.build();
+
+        // Only emit the RequestedAuthnContext element if at least a ClassRef or a DeclRef is present
+        if (!requestedAuthnContext.getAuthnContextClassRef().isEmpty() ||
+                !requestedAuthnContext.getAuthnContextDeclRef().isEmpty())
+            this.authnRequestType.setRequestedAuthnContext(requestedAuthnContext);
+
         return this;
     }
 
@@ -103,10 +129,13 @@ public class SpidSAML2AuthnRequestBuilder implements SamlProtocolExtensionsAware
 
     public AuthnRequestType createAuthnRequest() {
         AuthnRequestType res = this.authnRequestType;
-        NameIDType nameIDType = new NameIDType();
-        nameIDType.setValue(this.issuer);
-
-        res.setIssuer(nameIDType);
+        // SPID-UPDATE
+        // REPLACED NameIDType nameIDType = new NameIDType();
+        // REPLACED nameIDType.setValue(this.issuer);
+        //
+        // REPLACED res.setIssuer(nameIDType);
+        res.setIssuer(this.issuer);
+        // END-OF-SPID-UPDATE
 
         // SPID-UPDATE
         // REPLACED res.setDestination(URI.create(this.destination));

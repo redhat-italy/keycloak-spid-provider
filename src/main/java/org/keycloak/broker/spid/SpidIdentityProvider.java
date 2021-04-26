@@ -44,18 +44,14 @@ import org.keycloak.saml.processing.api.saml.v2.request.SAML2Request;
 import org.keycloak.saml.processing.core.util.KeycloakKeySamlExtensionGenerator;
 import org.keycloak.saml.validators.DestinationValidator;
 import org.keycloak.sessions.AuthenticationSessionModel;
+import org.keycloak.util.JsonSerialization;
 
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriInfo;
-import java.security.KeyPair;
-import java.util.Iterator;
-import java.util.Set;
-import java.util.TreeSet;
+import java.util.*;
 
-/**
- */
 public class SpidIdentityProvider extends AbstractIdentityProvider<SpidIdentityProviderConfig> {
     protected static final Logger logger = Logger.getLogger(SpidIdentityProvider.class);
     private final DestinationValidator destinationValidator;
@@ -90,13 +86,49 @@ public class SpidIdentityProvider extends AbstractIdentityProvider<SpidIdentityP
                 protocolBinding = JBossSAMLURIConstants.SAML_HTTP_POST_BINDING.get();
             }
 
+            // SPID-UPDATE
+            SAML2RequestedAuthnContextBuilder requestedAuthnContext =
+                    new SAML2RequestedAuthnContextBuilder()
+                            .setComparison(getConfig().getAuthnContextComparisonType());
+
+            for (String authnContextClassRef : getAuthnContextClassRefUris())
+                requestedAuthnContext.addAuthnContextClassRef(authnContextClassRef);
+
+            for (String authnContextDeclRef : getAuthnContextDeclRefUris())
+                requestedAuthnContext.addAuthnContextDeclRef(authnContextDeclRef);
+
+            Integer attributeConsumingServiceIndex = getConfig().getAttributeConsumingServiceIndex();
+
+            // loginHint not available in keycloak 9.0.3
+            // String loginHint = getConfig().isLoginHint() ? request.getAuthenticationSession().getClientNote(OIDCLoginProtocol.LOGIN_HINT_PARAM) : null;
+            // END-OF-SPID-UPDATE
+
             SpidSAML2AuthnRequestBuilder authnRequestBuilder = new SpidSAML2AuthnRequestBuilder()
                     .assertionConsumerUrl(assertionConsumerServiceUrl)
                     .destination(destinationUrl)
-                    .issuer(issuerURL)
+                    .issuer(// SPID-UPDATE
+                            SAML2NameIDBuilder.value(issuerURL)
+                            // add NameQualifier attribute to the Issuer element
+                            .setNameQualifier(issuerURL)
+                            //add Format attribute to the Issuer element
+                            .setFormat(JBossSAMLURIConstants.NAMEID_FORMAT_ENTITY.get())
+                            .build()
+                            // END-OF-SPID-UPDATE
+                    )
+                    .isPassive(null) // SPID-UPDATE disabled isPassive for SPID auth request compatibility
                     .forceAuthn(getConfig().isForceAuthn())
                     .protocolBinding(protocolBinding)
-                    .nameIdPolicy(SAML2NameIDPolicyBuilder.format(nameIDPolicyFormat));
+                    // SPID-UPDATE
+                    .nameIdPolicy(SpidSAML2NameIDPolicyBuilder
+                            .format(nameIDPolicyFormat)
+                            // SPID: add SPNameQualifier attribute to the NameIDPolicy element
+                            .setSPNameQualifier(issuerURL)
+                            .setAllowCreate(null) // SPID-UPDATE disabled AllowCreate for SPID auth request compatibility
+                            )
+                    .attributeConsumingServiceIndex(attributeConsumingServiceIndex)
+//                    .subject(loginHint).  // REQUIRED BUT NOT IMPLEMENTED in keycloak v.9.0.3
+                    .requestedAuthnContext(requestedAuthnContext);
+                    // END-OF-SPID-UPDATE
             JaxrsSAML2BindingBuilder binding = new JaxrsSAML2BindingBuilder(session)
                     .relayState(request.getState().getEncoded());
             boolean postBinding = getConfig().isPostBindingAuthnRequest();
@@ -139,6 +171,36 @@ public class SpidIdentityProvider extends AbstractIdentityProvider<SpidIdentityP
             throw new IdentityBrokerException("Could not create authentication request.", e);
         }
     }
+
+    // SPID-UPDATE
+    private List<String> getAuthnContextClassRefUris() {
+        String authnContextClassRefs = getConfig().getAuthnContextClassRefs();
+        if (authnContextClassRefs == null || authnContextClassRefs.isEmpty())
+            return new LinkedList<>();
+
+        try {
+            return Arrays.asList(JsonSerialization.readValue(authnContextClassRefs, String[].class));
+        } catch (Exception e) {
+            logger.warn("Could not json-deserialize AuthContextClassRefs config entry: " + authnContextClassRefs, e);
+            return new LinkedList<String>();
+        }
+    }
+    // END-OF-SPID-UPDATE
+
+    // SPID-UPDATE
+    private List<String> getAuthnContextDeclRefUris() {
+        String authnContextDeclRefs = getConfig().getAuthnContextDeclRefs();
+        if (authnContextDeclRefs == null || authnContextDeclRefs.isEmpty())
+            return new LinkedList<String>();
+
+        try {
+            return Arrays.asList(JsonSerialization.readValue(authnContextDeclRefs, String[].class));
+        } catch (Exception e) {
+            logger.warn("Could not json-deserialize AuthContextDeclRefs config entry: " + authnContextDeclRefs, e);
+            return new LinkedList<String>();
+        }
+    }
+    // END-OF-SPID-UPDATE
 
     private String getEntityId(UriInfo uriInfo, RealmModel realm) {
         return UriBuilder.fromUri(uriInfo.getBaseUri()).path("realms").path(realm.getName()).build().toString();
@@ -208,9 +270,22 @@ public class SpidIdentityProvider extends AbstractIdentityProvider<SpidIdentityP
     }
 
     protected LogoutRequestType buildLogoutRequest(UserSessionModel userSession, UriInfo uriInfo, RealmModel realm, String singleLogoutServiceUrl, NodeGenerator... extensions) throws ConfigurationException {
-        SAML2LogoutRequestBuilder logoutBuilder = new SAML2LogoutRequestBuilder()
+        // SPID-UPDATE
+        String entityId = getEntityId(uriInfo, realm);
+        // END-OF-SPID-UPDATE
+
+        SpidSAML2LogoutRequestBuilder logoutBuilder = new SpidSAML2LogoutRequestBuilder();
+        logoutBuilder.issuer(
+                        // SPID-UPDATE
+                        SAML2NameIDBuilder.value(entityId)
+                                // add NameQualifier attribute to the Issuer element
+                                .setNameQualifier(entityId)
+                                // add Format attribute to the Issuer element
+                                .setFormat(JBossSAMLURIConstants.NAMEID_FORMAT_ENTITY.get())
+                                .build()
+                        // END-OF-SPID-UPDATE
+                )
                 .assertionExpiration(realm.getAccessCodeLifespan())
-                .issuer(getEntityId(uriInfo, realm))
                 .sessionIndex(userSession.getNote(SpidSAMLEndpoint.SAML_FEDERATED_SESSION_INDEX))
                 .nameId(NameIDType.deserializeFromString(userSession.getNote(SpidSAMLEndpoint.SAML_FEDERATED_SUBJECT_NAMEID)))
                 .destination(singleLogoutServiceUrl);

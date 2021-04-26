@@ -120,12 +120,12 @@ public class SpidSAML2Request {
         authnRequest.setIssuer(issuer);
 
         // SPID-UPDATE add issuer format
-        try {
-            authnRequest.getIssuer().setFormat(new URI("urn:oasis:names:tc:SAML:2.0:nameid-format:entity"));
-        } catch (URISyntaxException e) {
-            e.printStackTrace();
-            throw new ConfigurationException(e);
-        }
+//        try {
+//            authnRequest.getIssuer().setFormat(new URI("urn:oasis:names:tc:SAML:2.0:nameid-format:entity"));
+//        } catch (URISyntaxException e) {
+//            e.printStackTrace();
+//            throw new ConfigurationException(e);
+//        }
         // END-OF-SPID-UPDATE
 
         // Create a default NameIDPolicy

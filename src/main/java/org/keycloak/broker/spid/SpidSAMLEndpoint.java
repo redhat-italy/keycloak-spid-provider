@@ -285,6 +285,8 @@ public class SpidSAMLEndpoint {
             }
         }
 
+        // SPID: this method has not been updated since in this keycloak version (9.0.3) has still the
+        // required implementation for SPID but it will be different in next version (v.12.0.0 is different)
         protected Response logoutRequest(LogoutRequestType request, String relayState) {
             String brokerUserId = config.getAlias() + "." + request.getNameID().getValue();
             if (request.getSessionIndex() == null || request.getSessionIndex().isEmpty()) {
@@ -435,26 +437,26 @@ public class SpidSAMLEndpoint {
 
                 // SPID-UPDATE
                 // set username with spidCode
-                Set<AttributeStatementType> attributeStatements = assertion.getAttributeStatements();
-                for (AttributeStatementType next : attributeStatements) {
-                    List<AttributeStatementType.ASTChoiceType> attributes = next.getAttributes();
-                    for (AttributeStatementType.ASTChoiceType astChoiceType : attributes) {
-                        String name = astChoiceType.getAttribute().getName();
-                        if (name.equals("spidCode")) {
-                            //identity.setUsername(astChoiceType.getAttribute().getAttributeValue().get(0).toString());
-                        }
-
-                        if (name.equals("email")) {
-                            identity.setEmail(astChoiceType.getAttribute().getAttributeValue().get(0).toString());
-                        }
-
-                    }
-                }
-
-                // Static set(s) for flawless login
-                identity.setName("Name");
-                identity.setFirstName("First Name");
-                identity.setLastName("Last Name");
+//                Set<AttributeStatementType> attributeStatements = assertion.getAttributeStatements();
+//                for (AttributeStatementType next : attributeStatements) {
+//                    List<AttributeStatementType.ASTChoiceType> attributes = next.getAttributes();
+//                    for (AttributeStatementType.ASTChoiceType astChoiceType : attributes) {
+//                        String name = astChoiceType.getAttribute().getName();
+//                        if (name.equals("spidCode")) {
+//                            //identity.setUsername(astChoiceType.getAttribute().getAttributeValue().get(0).toString());
+//                        }
+//
+//                        if (name.equals("email")) {
+//                            identity.setEmail(astChoiceType.getAttribute().getAttributeValue().get(0).toString());
+//                        }
+//
+//                    }
+//                }
+//
+//                // Static set(s) for flawless login
+//                identity.setName("Name");
+//                identity.setFirstName("First Name");
+//                identity.setLastName("Last Name");
                 // END-OF-SPID-UPDATE
 
                 //SAML Spec 2.2.2 Format is optional

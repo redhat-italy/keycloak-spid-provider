@@ -72,9 +72,6 @@ public class SpidSAMLRequestWriter extends BaseWriter {
 
         URI destination = request.getDestination();
 
-        // SPID-UPDATE
-        StaxUtil.writeAttribute(writer, "AttributeConsumingServiceIndex", "1");
-
         if (destination != null)
             StaxUtil.writeAttribute(writer, JBossSAMLConstants.DESTINATION.get(), destination.toASCIIString());
 
@@ -92,11 +89,10 @@ public class SpidSAMLRequestWriter extends BaseWriter {
             StaxUtil.writeAttribute(writer, JBossSAMLConstants.FORCE_AUTHN.get(), forceAuthn.toString());
         }
 
-        /* SPID-UPDATE
         Boolean isPassive = request.isIsPassive();
         if (isPassive != null) {
             StaxUtil.writeAttribute(writer, JBossSAMLConstants.IS_PASSIVE.get(), isPassive.toString());
-        }*/
+        }
 
         URI protocolBinding = request.getProtocolBinding();
         if (protocolBinding != null) {
@@ -120,16 +116,6 @@ public class SpidSAMLRequestWriter extends BaseWriter {
 
         NameIDType issuer = request.getIssuer();
         if (issuer != null) {
-            // SPID-UPDATE: attributes for Spid Auth
-            try {
-                issuer.setFormat(new URI("urn:oasis:names:tc:SAML:2.0:nameid-format:entity"));
-                issuer.setNameQualifier("http://keycloak.test.spid.it");
-            } catch (URISyntaxException e) {
-                e.printStackTrace();
-                throw new ProcessingException(e);
-            }
-            // END-OF-SPID-UPDATE
-
             write(issuer, new QName(ASSERTION_NSURI.get(), JBossSAMLConstants.ISSUER.get(), ASSERTION_PREFIX));
         }
 
@@ -153,12 +139,12 @@ public class SpidSAMLRequestWriter extends BaseWriter {
             write(requestedAuthnContext);
         }
         // SPID-UPDATE
-        else {
-            request.setRequestedAuthnContext(new RequestedAuthnContextType());
-            request.getRequestedAuthnContext().addAuthnContextClassRef("https://www.spid.gov.it/SpidL2");
-            request.getRequestedAuthnContext().setComparison(AuthnContextComparisonType.MINIMUM);
-            write(request.getRequestedAuthnContext());
-        }
+//        else {
+//            request.setRequestedAuthnContext(new RequestedAuthnContextType());
+//            request.getRequestedAuthnContext().addAuthnContextClassRef("https://www.spid.gov.it/SpidL2");
+//            request.getRequestedAuthnContext().setComparison(AuthnContextComparisonType.MINIMUM);
+//            write(request.getRequestedAuthnContext());
+//        }
         // END-OF-SPID-UPDATE
 
         StaxUtil.writeEndElement(writer);
@@ -245,11 +231,10 @@ public class SpidSAMLRequestWriter extends BaseWriter {
             StaxUtil.writeAttribute(writer, JBossSAMLConstants.SP_NAME_QUALIFIER.get(), spNameQualifier);
         }
 
-        /* SPID-UPDATE: disabled for spid compatibility
         Boolean allowCreate = nameIDPolicy.isAllowCreate();
         if (allowCreate != null) {
             StaxUtil.writeAttribute(writer, JBossSAMLConstants.ALLOW_CREATE.get(), allowCreate.toString());
-        }*/
+        }
 
         StaxUtil.writeEndElement(writer);
         StaxUtil.flush(writer);
