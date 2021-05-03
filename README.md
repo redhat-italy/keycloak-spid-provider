@@ -134,7 +134,7 @@ and replace it with the following line:
 from signxml.exceptions import InvalidDigest, InvalidInput, InvalidSignature as InvalidSignature_
 ```
 
-Then, inside the class `HTTPPostSignatureVerifier` definition, replace:
+Then, inside the class `HTTPPostSignatureVerifier` definition, find the `def _verify_signature(self):` and replace:
 
 ```python
             self._verifier.verify(
