@@ -161,7 +161,7 @@ with:
 
 Pay attention to indentation.
 
-Now you an build the Docker image:
+Now you can build the Docker image:
 
 ```shell
 $ docker build -t italia/spid-testenv2:custom-fix .
