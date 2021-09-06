@@ -239,7 +239,7 @@ Fill in the other fields as follows (leave the other fields as set by default).
 - **Sign Service Provider Metadata**: set to `ON`
 - **Attribute Consuming Service Index**: set to `1`. This corresponds to the index of the Attribute Consuming Service defined in your SP metadata - if you have more than one, you can change it to the value you need.
 The following attributes are used to automatically generate a SPID compliant SAML SP metadata document.  
-As the SPID SP metadata is actually the "union" of all of the metadata for the different IdPs, you will only need to set those in the first SPID IdP in alphabetical order. The values for all the other providers will be ignored, so just let them blank.
+As the SPID SP metadata is actually the "union" of all of the metadata for the different IdPs, you will only need to set those in the first SPID IdP in alphabetical order. The values for all the other providers will be ignored, so just leave them blank.
 
 - **Attribute Consuming Service Names**: comma separated list of localized service names. Each string should be entered in the format `<locale>|<text>` (e.g. `en|Online services,it|Servizi online`)
 - **Organization Names, Organization Display Names, Organization URLs**: Localized data for the organization, same format as above (e.g. `en|Online services,it|Servizi online` for both *Names* and *Display Names*, for `en|http://localhost:8080` *URLs*)
