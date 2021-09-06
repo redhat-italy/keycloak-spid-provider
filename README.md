@@ -195,7 +195,7 @@ Come back to Keycloak admin console.
 
 Select the target realm (or create one if required).
 
-The following instructions can be reused to define all the allowed Identity Providers that SPID supports.
+The following instructions can be reused to define all of the Identity Providers supported by SPID.
 
 ### Setup a custom "First Broker Login" Authentication Flow
 
