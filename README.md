@@ -199,9 +199,9 @@ The following instructions can be reused to define all of the Identity Providers
 
 ### Setup a custom "First Broker Login" Authentication Flow
 
-This step is required because we want that if a user login with different identity providers (even different SPID authorized IDP), they are all linked to the same keycloak account (if already existent, otherwise it gets created).
+This step is required because we want that if a user logs in with different identity providers (even different SPID authorized IDP), they are all linked to the same keycloak account (if already existent, otherwise it gets created).
 
-However, even if the username is the same, Keycloak will trigger by default an "Existing Account Verification" step: since this is not desirable because we trust the information from SPID IdPs, we define a new *First Broker Login* Authentication Flow to automatically set the existing user.
+However, even if the username is the same, Keycloak will trigger by default an "Existing Account Verification" step with link confirmation: since this is not desirable because we trust the information from SPID IdPs, we define a new *First Broker Login* Authentication Flow to automatically set the existing user.
 
 1. In the Keycloak admin console, select the *Authentication* item from the left menu;
 2. In the *Flows* tab, select *First Broker Login* and then click *Copy*;
@@ -210,17 +210,17 @@ However, even if the username is the same, Keycloak will trigger by default an "
 5. Choose the provider *Automatically Set Existing User* and click *Save*;
 6. With the up/down arrows, move the new execution above the *Confirm Link Existing Account* entry;
 7. Set the *Requirement* column radio button of the *Automatically Set Existing User* execution to *Required*
-8. Set both the *Confirm Link Existing Account* and the *First Broker Login Account SPID Verification Options* radio buttons to *Disabled*.
+8. Set both the *Confirm Link Existing Account* and the *First Broker Login SPID Account Verification Options* radio buttons to *Disabled*.
 
 ### Identity Provider configuration
 
-1. select the *Identity Providers* item from the left menu, click on *Add provider*, then select *SPID*;
-2. in the *Add Identity Provider* page, scroll to the bottom and set the *Import from URL* field to the provider metadata url endpoint [http://localhost:8088/metadata](http://localhost:8088/metadata) (SPID TestEnv must be running at this point);
+1. Select the *Identity Providers* item from the left menu, click on *Add provider*, then select *SPID*;
+2. In the *Add Identity Provider* page, scroll to the bottom and set the *Import from URL* field to the provider metadata url endpoint [http://localhost:8088/metadata](http://localhost:8088/metadata) (SPID TestEnv must be running at this point);
 3. Click on the Import button.
 
 Most of the fields will be filled in automatically.
 
-Fill in the other fields as follows (leave other field as set by default).
+Fill in the other fields as follows (leave the other fields as set by default).
 
 #### Main section
 - **Alias**: enter a name for the provider (it will be used as an URL component, so DO NOT enter space characters)
