@@ -16,7 +16,7 @@ This guide describe the steps required to successfully integrate a Keycloak envi
 
 ### Build jar file
 
-Clone this git repositor and build it using Maven:
+Clone this git repository and build it using Maven:
 
 ```shell
 $ git clone https://github.com/redhat-italy/keycloak-spid-provider.git
