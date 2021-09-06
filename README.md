@@ -28,7 +28,7 @@ After a successful build you will find the `spid-provider.jar` jar file in the `
 
 ### Deploy into Keycloak
 
-The instructions consider a *standalone* installation but are applicable to *domain* installations as well (changing the right target directory names).
+The instructions consider a *standalone* installation but are applicable to *managed domain* installations as well (changing the target directory names where it is required).
 
 Shutdown the Keycloak server.
 
