@@ -53,7 +53,7 @@ $ cp src/main/resources/theme-resources/resources/js/controllers/realm.js $KC_HO
 
 > **Note**
 >
-> The `realm.js` file doesn't get automatically deployed with jar file, even if contained into it: for this reason it must be manually copied.
+> The `realm.js` file doesn't get automatically deployed with jar file at this moment: for this reason it must be manually copied.
 > 
 > For convenience, a future version will deploy both the jar and js files inside a Docker container running the Keycloak instance.
 
@@ -103,7 +103,7 @@ with the following:
 </theme>
 ```
 
-Then restart Keycloak and it will reload the new resources from the jar package. Make sure you also clear your browser caches (or use *incognito mode*) when verifying the correct deployment. After the first reload you can turn back on the caches and restart Keycloak again.
+Then restart Keycloak and it will reload the new resources from the jar package. Make sure you also clear your browser caches (or use *incognito mode*) when verifying the correct deployment. After the first reload you can turn back on the caches and restart Keycloak again (if required).
 
 ## Install and configure the local SPID TestEnv docker environment
 
