@@ -334,7 +334,7 @@ Configure the Service Provider Metadata in the *SPID TestEnv* server executing t
 
 Connecting to the *SPID TestEnv* at [http://localhost:8088](http://localhost:8088), you should see you Service Provider listed in the home page.
 
-In the tab *Utenti* are listed some test user for login/logout tests.
+Some test users are listed in the tab named *Utenti*: they can be used for login/logout tests.
 
 ## Testing login - logout
 
