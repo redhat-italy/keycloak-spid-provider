@@ -24,6 +24,7 @@ import org.jboss.resteasy.spi.ResteasyProviderFactory;
 import org.keycloak.broker.provider.BrokeredIdentityContext;
 import org.keycloak.broker.provider.IdentityBrokerException;
 import org.keycloak.broker.provider.IdentityProvider;
+import org.keycloak.broker.spid.mappers.SamlProtocolExtension;
 import org.keycloak.common.ClientConnection;
 import org.keycloak.common.VerificationException;
 import org.keycloak.dom.saml.v2.assertion.AssertionType;
@@ -34,10 +35,7 @@ import org.keycloak.dom.saml.v2.assertion.NameIDType;
 import org.keycloak.dom.saml.v2.assertion.SubjectConfirmationDataType;
 import org.keycloak.dom.saml.v2.assertion.SubjectConfirmationType;
 import org.keycloak.dom.saml.v2.assertion.SubjectType;
-import org.keycloak.dom.saml.v2.protocol.LogoutRequestType;
-import org.keycloak.dom.saml.v2.protocol.RequestAbstractType;
-import org.keycloak.dom.saml.v2.protocol.ResponseType;
-import org.keycloak.dom.saml.v2.protocol.StatusResponseType;
+import org.keycloak.dom.saml.v2.protocol.*;
 import org.keycloak.events.Details;
 import org.keycloak.events.Errors;
 import org.keycloak.events.EventBuilder;
@@ -63,6 +61,7 @@ import org.keycloak.saml.common.constants.JBossSAMLURIConstants;
 import org.keycloak.saml.common.exceptions.ConfigurationException;
 import org.keycloak.saml.common.exceptions.ProcessingException;
 import org.keycloak.saml.common.util.DocumentUtil;
+import org.keycloak.saml.common.util.StringUtil;
 import org.keycloak.saml.processing.core.saml.v2.common.SAMLDocumentHolder;
 import org.keycloak.saml.processing.core.saml.v2.constants.X500SAMLProfileConstants;
 import org.keycloak.saml.processing.core.saml.v2.util.AssertionUtil;
@@ -87,16 +86,14 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriInfo;
+import javax.xml.datatype.*;
 import javax.xml.namespace.QName;
 import java.io.IOException;
 import java.security.Key;
 import java.security.cert.X509Certificate;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.time.Instant;
+import java.time.format.DateTimeParseException;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
@@ -117,7 +114,6 @@ import org.w3c.dom.NodeList;
 import java.net.URI;
 import java.security.cert.CertificateException;
 
-import java.util.Collections;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.xml.crypto.dsig.XMLSignature;
 
@@ -136,12 +132,17 @@ public class SpidSAMLEndpoint {
     public static final String SAML_LOGIN_RESPONSE = "SAML_LOGIN_RESPONSE";
     public static final String SAML_ASSERTION = "SAML_ASSERTION";
     public static final String SAML_AUTHN_STATEMENT = "SAML_AUTHN_STATEMENT";
+    public static final String ISSUER_FORMAT = "urn:oasis:names:tc:SAML:2.0:nameid-format:entity";
+    public static final String ASSERTION_NAMEID_FORMAT = "urn:oasis:names:tc:SAML:2.0:nameid-format:transient";
+    public static final String ASSERTION_ISSUER_FORMAT = "urn:oasis:names:tc:SAML:2.0:nameid-format:entity";
+
     protected RealmModel realm;
     protected EventBuilder event;
     protected SpidIdentityProviderConfig config;
     protected IdentityProvider.AuthenticationCallback callback;
     protected SpidIdentityProvider provider;
     private final DestinationValidator destinationValidator;
+
 
     @Context
     private KeycloakSession session;
@@ -281,16 +282,10 @@ public class SpidSAMLEndpoint {
             // validate destination
             if (isDestinationRequired() &&
                     requestAbstractType.getDestination() == null && containsUnencryptedSignature(holder)) {
-                event.event(EventType.IDENTITY_PROVIDER_RESPONSE);
-                event.detail(Details.REASON, Errors.MISSING_REQUIRED_DESTINATION);
-                event.error(Errors.INVALID_REQUEST);
-                return ErrorPage.error(session, null, Response.Status.BAD_REQUEST, Messages.INVALID_REQUEST);
+                return getResponse(Errors.MISSING_REQUIRED_DESTINATION, Errors.INVALID_REQUEST, Messages.INVALID_REQUEST);
             }
             if (! destinationValidator.validate(getExpectedDestination(config.getAlias(), null), requestAbstractType.getDestination())) {
-                event.event(EventType.IDENTITY_PROVIDER_RESPONSE);
-                event.detail(Details.REASON, Errors.INVALID_DESTINATION);
-                event.error(Errors.INVALID_SAML_RESPONSE);
-                return ErrorPage.error(session, null, Response.Status.BAD_REQUEST, Messages.INVALID_REQUEST);
+                return getResponse(Errors.INVALID_DESTINATION, Errors.INVALID_SAML_RESPONSE, Messages.INVALID_REQUEST);
             }
             if (config.isValidateSignature()) {
                 try {
@@ -408,28 +403,28 @@ public class SpidSAMLEndpoint {
         protected Response handleLoginResponse(String samlResponse, SAMLDocumentHolder holder, ResponseType responseType, String relayState, String clientId) {
 
             try {
-                AuthenticationSessionModel authSession;
-                if (clientId != null && ! clientId.trim().isEmpty()) {
-                    authSession = samlIdpInitiatedSSO(clientId);
-                } else {
-                    authSession = callback.getAndVerifyAuthenticationSession(relayState);
-                }
+                AuthenticationSessionModel authSession = getAuthenticationSessionModel(relayState, clientId);
                 session.getContext().setAuthenticationSession(authSession);
 
                 KeyManager.ActiveRsaKey keys = session.keys().getActiveRsaKey(realm);
-                if (! isSuccessfulSamlResponse(responseType)) {
-                    // Translate SPID error codes to meaningful messages
-                    boolean isSpidFault = responseType.getStatus() != null
-                        && responseType.getStatus().getStatusMessage() != null
-                        && responseType.getStatus().getStatusMessage().startsWith("ErrorCode nr");
-                    if (isSpidFault)
-                        return callback.error("SpidFault_" + responseType.getStatus().getStatusMessage().replace(' ', '_'));
-                    else
-                    {
-                        String statusMessage = responseType.getStatus() == null ? Messages.IDENTITY_PROVIDER_UNEXPECTED_ERROR : responseType.getStatus().getStatusMessage();
-                        return callback.error(statusMessage);
-                    }
-                }
+
+                // questo blocco impedisce la definizione granulare dei messaggi
+
+//                if (! isSuccessfulSamlResponse(responseType)) {
+//                    // Translate SPID error codes to meaningful messages
+//                    boolean isSpidFault = responseType.getStatus() != null
+//                        && responseType.getStatus().getStatusMessage() != null
+//                        && responseType.getStatus().getStatusMessage().startsWith("ErrorCode nr");
+//                    if (isSpidFault)
+//                        return callback.error("SpidFault_" + responseType.getStatus().getStatusMessage().replace(' ', '_'));
+                    // questo blocco impedisce la definizione granulare dei messaggi
+//                    else
+//                    {
+
+//                        String statusMessage = responseType.getStatus() == null ? Messages.IDENTITY_PROVIDER_UNEXPECTED_ERROR : responseType.getStatus().getStatusMessage();
+//                        return callback.error(statusMessage);
+//                    }
+//                }
                 if (responseType.getAssertions() == null || responseType.getAssertions().isEmpty()) {
                     return callback.error(Messages.IDENTITY_PROVIDER_UNEXPECTED_ERROR);
                 }
@@ -455,8 +450,13 @@ public class SpidSAMLEndpoint {
                 }
 
                 // Apply SPID-specific response validation rules
-                String spidExpectedRequestId = authSession.getClientNote(SamlProtocol.SAML_REQUEST_ID);
-                String spidResponseValidationError = verifySpidResponse(holder.getSamlDocument().getDocumentElement(), assertionElement, spidExpectedRequestId);
+                String spidExpectedRequestId = authSession.getClientNote(SamlProtocolExtension.SAML_REQUEST_ID_BROKER);
+                String spidResponseValidationError = verifySpidResponse(holder.getSamlDocument().getDocumentElement(),
+                        assertionElement,
+                        spidExpectedRequestId,
+                        responseType,
+                        authSession);
+
                 if (spidResponseValidationError != null)
                 {
                     logger.error("SPID Response Validation Error: " + spidResponseValidationError);
@@ -466,7 +466,7 @@ public class SpidSAMLEndpoint {
                 }
 
                 // Validate InResponseTo attribute: must match the generated request ID
-                String expectedRequestId = authSession.getClientNote(SamlProtocol.SAML_REQUEST_ID);
+                String expectedRequestId = authSession.getClientNote(SamlProtocolExtension.SAML_REQUEST_ID_BROKER);
                 final boolean inResponseToValidationSuccess = validateInResponseToAttribute(responseType, expectedRequestId);
                 if (!inResponseToValidationSuccess)
                 {
@@ -565,6 +565,16 @@ public class SpidSAMLEndpoint {
             }
         }
 
+        private AuthenticationSessionModel getAuthenticationSessionModel(String relayState, String clientId) {
+            AuthenticationSessionModel authSession;
+            if (clientId != null && ! clientId.trim().isEmpty()) {
+                authSession = samlIdpInitiatedSSO(clientId);
+            } else {
+                authSession = callback.getAndVerifyAuthenticationSession(relayState);
+            }
+            return authSession;
+        }
+
 
         /**
          * If there is a client whose SAML IDP-initiated SSO URL name is set to the
@@ -614,25 +624,19 @@ public class SpidSAMLEndpoint {
         public Response handleSamlResponse(String samlResponse, String relayState, String clientId) {
             SAMLDocumentHolder holder = extractResponseDocument(samlResponse);
             if (holder == null) {
-                event.event(EventType.IDENTITY_PROVIDER_RESPONSE);
-                event.detail(Details.REASON, Errors.INVALID_SAML_DOCUMENT);
-                event.error(Errors.INVALID_SAML_RESPONSE);
-                return ErrorPage.error(session, null, Response.Status.BAD_REQUEST, Messages.INVALID_FEDERATED_IDENTITY_ACTION);
+                return getResponse(Errors.INVALID_SAML_DOCUMENT, Errors.INVALID_SAML_RESPONSE, Messages.INVALID_FEDERATED_IDENTITY_ACTION);
             }
             StatusResponseType statusResponse = (StatusResponseType)holder.getSamlObject();
+
+
             // validate destination
             if (isDestinationRequired()
                     && statusResponse.getDestination() == null && containsUnencryptedSignature(holder)) {
-                event.event(EventType.IDENTITY_PROVIDER_RESPONSE);
-                event.detail(Details.REASON, Errors.MISSING_REQUIRED_DESTINATION);
-                event.error(Errors.INVALID_SAML_LOGOUT_RESPONSE);
-                return ErrorPage.error(session, null, Response.Status.BAD_REQUEST, Messages.INVALID_REQUEST);
+                return getResponse(Errors.MISSING_REQUIRED_DESTINATION, Errors.INVALID_SAML_LOGOUT_RESPONSE, Messages.INVALID_REQUEST);
             }
+
             if (! destinationValidator.validate(getExpectedDestination(config.getAlias(), clientId), statusResponse.getDestination())) {
-                event.event(EventType.IDENTITY_PROVIDER_RESPONSE);
-                event.detail(Details.REASON, Errors.INVALID_DESTINATION);
-                event.error(Errors.INVALID_SAML_RESPONSE);
-                return ErrorPage.error(session, null, Response.Status.BAD_REQUEST, Messages.INVALID_REQUEST);
+                return getResponse(Errors.INVALID_DESTINATION, Errors.INVALID_SAML_RESPONSE, Messages.INVALID_REQUEST);
             }
             if (config.isValidateSignature()) {
                 try {
@@ -684,6 +688,13 @@ public class SpidSAMLEndpoint {
             }
             return Urls.identityProviderAuthnResponse(session.getContext().getUri().getBaseUri(), providerAlias, realm.getName()).toString();
         }
+    }
+
+    private Response getResponse(String invalidReason, String invalidSamlResponse, String errorDisplayed) {
+        event.event(EventType.IDENTITY_PROVIDER_RESPONSE);
+        event.detail(Details.REASON, invalidReason);
+        event.error(invalidSamlResponse);
+        return ErrorPage.error(session, null, Response.Status.BAD_REQUEST, errorDisplayed);
     }
 
     protected class PostBinding extends Binding {
@@ -877,9 +888,91 @@ public class SpidSAMLEndpoint {
         return true;
     }
 
-    private String verifySpidResponse(Element documentElement, Element assertionElement, String expectedRequestId) {
+    /**
+     * This method verifies the correctness of the response sent by the IdP.
+     * The comments written in italian are the actual copy of the error statements
+     * given by the AGID testing tool. In this way it is possible to keep track which code block
+     * belongs to which test, and its requirement.
+     *
+     * @param documentElement
+     * @param assertionElement
+     * @param expectedRequestId
+     * @param responseType
+     * @param authSession
+     * @return spidcode response error string
+     */
+    private String verifySpidResponse(Element documentElement,
+                                      Element assertionElement,
+                                      String expectedRequestId,
+                                      ResponseType responseType,
+                                      AuthenticationSessionModel authSession)
+    {
+            //2: Unsigned Response
+           if (responseType.getSignature() == null) {
+                return "SpidSamlCheck_02";
+            }
+
+            //3: Unsigned Assertion
+            if (responseType.getAssertions().size() > 0 &&
+                    responseType.getAssertions().get(0).getAssertion().getSignature() == null) {
+                return "SpidSamlCheck_03";
+            }
+            //8: Null ID
+            if (StringUtil.isNullOrEmpty(responseType.getID())) {
+                return "SpidSamlCheck_08";
+            }
+
+
+        String requestIssueInstantNote = authSession.getClientNote(JBossSAMLConstants.ISSUE_INSTANT.name());
+        try {
+            XMLGregorianCalendar requestIssueInstant = DatatypeFactory.newInstance().
+                    newXMLGregorianCalendar(requestIssueInstantNote);
+
+            // 13: IssueInstant correct UTC format -> non valid UTC format throws DateTimeParseException
+            Instant.parse(responseType.getIssueInstant().toString());
+
+
+            XMLGregorianCalendar responseIssueInstant = responseType.getIssueInstant();
+
+            //14: Issue Instant req < Issue Instant Response
+            if(responseIssueInstant.compare(requestIssueInstant) != DatatypeConstants.GREATER){
+                return "SpidSamlCheck_14";
+            }
+
+            //15: Response Attribute IssueInstant within three minutes of request IssueInstant
+            //https://github.com/italia/spid-saml-check/issues/73
+            //max tolerance of three minutes
+            long responseTimeMillis = responseIssueInstant.toGregorianCalendar().getTimeInMillis();
+            long requestTimeMillis = requestIssueInstant.toGregorianCalendar().getTimeInMillis();
+
+            if((responseTimeMillis-requestTimeMillis)>0 && (responseTimeMillis-requestTimeMillis)>180000){
+                return "SpidSamlCheck_15";
+
+            }
+
+
+            GregorianCalendar now = new GregorianCalendar();
+            XMLGregorianCalendar nowXmlGregorianCalendar = DatatypeFactory.newInstance().newXMLGregorianCalendar(now);
+            if(responseIssueInstant.compare(nowXmlGregorianCalendar) == DatatypeConstants.GREATER){
+                return "SpidSamlCheck_15";
+            }
+
+            //110 IssueInstant must not have milliseconds
+            int responseIssueInstantMillisecond = responseIssueInstant.getMillisecond();
+            if(responseIssueInstantMillisecond>0){
+                return "SpidSamlCheck_110";
+            }
+
+
+        } catch (DatatypeConfigurationException e) {
+            logger.error("Could not convert request IssueInstant to XMLGregorianCalendar, wrong format?");
+            return "SpidFault_ErrorCode_nr3";
+        } catch (DateTimeParseException e){
+            return "SpidSamlCheck_13";
+        }
+
         // 17: Response > InResponseTo missing
-        if (!documentElement.hasAttribute("InResponseTo")) {
+             if (!documentElement.hasAttribute("InResponseTo")) {
             return "SpidSamlCheck_nr17";
         }
 
@@ -894,9 +987,113 @@ public class SpidSAMLEndpoint {
             return "SpidSamlCheck_nr18";
         }
 
+        //22 Unspecified Element Status
+        if(responseType.getStatus()!=null &&
+                responseType.getStatus().getStatusCode()==null &&
+                responseType.getStatus().getStatusDetail()==null &&
+                responseType.getStatus().getStatusMessage() == null){
+            return "SpidSamlCheck_22";
+        }
+
+        //23 Missing Element Status
+        if(responseType.getStatus()==null){
+            return "SpidSamlCheck_23";
+        }
+
+        //24 Unspecified Element StatusCode
+        if(responseType.getStatus()!=null &&
+                responseType.getStatus().getStatusCode()!=null &&
+                StringUtil.isNullOrEmpty(responseType.getStatus().getStatusCode().getValue().toString())){
+            return "SpidSamlCheck_24";
+        }
+
+        //25 Missing StatusCode: note-> The test fails with code 22 because the
+        // element <samlp:Status\> sent by the response is the same. (See response  xml from the SPID testing tool)
+
+        if(responseType.getStatus()!=null &&
+                responseType.getStatus().getStatusCode()==null){
+            return "SpidSamlCheck_25";
+        }
+
+        //26 StatusCode element != Success
+        if(responseType.getStatus()!=null &&
+                responseType.getStatus().getStatusCode()!=null &&
+                !responseType.getStatus().getStatusCode().getValue().toString().substring(responseType.getStatus().getStatusCode().getValue().toString().lastIndexOf(":")+1).equals("Success")){
+            return "SpidSamlCheck_26";
+        }
+
+        //27 Unspecified Issuer element
+        if(responseType.getIssuer()!=null &&
+                StringUtil.isNullOrEmpty(responseType.getIssuer().getValue())){
+            return "SpidSamlCheck_27";
+        }
+
+        //28 Missing element Issuer
+        // the test fails with code 1 (test2) because the testing tool sends an unsigned response
+        // the control block is included anyhow
+        if(responseType.getIssuer()==null){
+            return "SpidSamlCheck_28";
+        }
+
+        //29 Element Issuer != EntityID IdP
+        if(!responseType.getIssuer().getValue().equalsIgnoreCase(config.getIdpEntityId())){
+            return "SpidSamlCheck_29";
+        }
+
+        //30/31  Format di Issuer attribute must be omitted or have the value  urn:oasis:names:tc:SAML:2.0:nameid-format:entity
+        if(responseType.getIssuer()!=null &&
+            responseType.getIssuer().getFormat()!=null &&
+            !responseType.getIssuer().getFormat().toString().equals(ISSUER_FORMAT)){
+            return "SpidSamlCheck_30";
+        }
+
+        //33 Assertion attribute ID unspecified
+        //32/34 checked by keycloak
+        String assertionID = assertionElement.getAttribute("ID");
+        if(assertionID.equals("")){
+            return "SpidSamlCheck_33";
+        }
+
+        String assertionIssueInstant = assertionElement.getAttribute("IssueInstant");
+
+
+        if(!StringUtil.isNullOrEmpty(assertionIssueInstant)){
+            try {
+                XMLGregorianCalendar requestIssueInstant = DatatypeFactory.newInstance().
+                        newXMLGregorianCalendar(requestIssueInstantNote);
+                XMLGregorianCalendar assertionIssueInstantXML = DatatypeFactory.newInstance().
+                        newXMLGregorianCalendar(assertionIssueInstant);
+                //39 Assertion IssueInstant attribute < Request IssueInstant
+
+                if(assertionIssueInstantXML.compare(requestIssueInstant) == DatatypeConstants.LESSER){
+                    return "SpidSamlCheck_39";
+                }
+
+                //40. Assertion IssueInstant attribute > later than 3 minutes from request
+                //https://github.com/italia/spid-saml-check/issues/73
+                //max tolerance of three minutes
+                long assertionTimeMillis = assertionIssueInstantXML.toGregorianCalendar().getTimeInMillis();
+                long requestTimemillis = requestIssueInstant.toGregorianCalendar().getTimeInMillis();
+
+                if((assertionTimeMillis-requestTimemillis)>0 && (assertionTimeMillis-requestTimemillis)>180000){
+                    return "SpidSamlCheck_40";
+
+                }
+
+                //110 Assertion IssueInstant with milliseconds
+                int assertionIssueInstantXMLMillisecond = assertionIssueInstantXML.getMillisecond();
+                if (assertionIssueInstantXMLMillisecond > 0){
+                    return "SpidSamlCheck_110";
+                }
+
+            } catch (DatatypeConfigurationException e) {
+                logger.error("Could not convert request IssueInstant to XMLGregorianCalendar, wrong format?");
+                return "SpidFault_ErrorCode_nr3";
+            }
+        }
+
         // 42: Assertion > Subject missing
-        Element subjectElement = DocumentUtil.getChildElement(assertionElement, 
-            new QName(JBossSAMLURIConstants.ASSERTION_NSURI.get(), "Subject"));
+        Element subjectElement = getDocumentElement(assertionElement, "Subject");
         if (subjectElement == null) {
             return "SpidSamlCheck_nr42";
         }
@@ -906,9 +1103,34 @@ public class SpidSAMLEndpoint {
             return "SpidSamlCheck_nr41";
         }
 
+        //44 Assertion NameID missing
+        Element nameID = getDocumentElement(assertionElement, "NameID");
+        if(nameID==null){
+                return "SpidSamlCheck_44";
+        }
+
+        //43 Assertion NameID unspecified
+        if(nameID.getFirstChild() != null && StringUtil.isNullOrEmpty(nameID.getFirstChild().getNodeValue().trim())){
+        return "SpidSamlCheck_43";
+       }
+
+        //45/46 Format NameID attribute missing or unspecified
+        if(StringUtil.isNullOrEmpty(nameID.getAttribute("Format"))){
+            return "SpidSamlCheck_4546";
+        }
+
+        //47 Format NameID attribute !=  urn:oasis:names:tc:SAML:2.0:nameidformat:transient
+        if(!StringUtil.isNullOrEmpty(nameID.getAttribute("Format")) && !nameID.getAttribute("Format").equals(ASSERTION_NAMEID_FORMAT)){
+            return "SpidSamlCheck_47";
+
+        }
+        //48/49 Assertion NameQualifier unspecified
+        if(StringUtil.isNullOrEmpty(nameID.getAttribute("NameQualifier"))){
+            return "SpidSamlCheck_4849";
+        }
+
         // 52: Assertion > Subject > Confirmation missing
-        Element subjectConfirmationElement = DocumentUtil.getChildElement(subjectElement, 
-            new QName(JBossSAMLURIConstants.ASSERTION_NSURI.get(), "SubjectConfirmation"));
+        Element subjectConfirmationElement = getDocumentElement(subjectElement, "SubjectConfirmation");
 
         if (subjectConfirmationElement == null) {
             return "SpidSamlCheck_nr52";
@@ -935,9 +1157,8 @@ public class SpidSAMLEndpoint {
             return "SpidSamlCheck_nr55";
         }
 
-        // 56: Assertion > Subject > Confirmation > SubjectConfirmationData missing
-        Element subjectConfirmationDataElement = DocumentUtil.getChildElement(subjectConfirmationElement, 
-            new QName(JBossSAMLURIConstants.ASSERTION_NSURI.get(), "SubjectConfirmationData"));
+        // 56: Assertion > Subject > Confirmation > SubjectConfirmationData missing. Testing tool xml snippet same as 51
+        Element subjectConfirmationDataElement = getDocumentElement(subjectConfirmationElement, "SubjectConfirmationData");
 
         if (subjectConfirmationDataElement == null) {
             return "SpidSamlCheck_nr56";
@@ -947,7 +1168,14 @@ public class SpidSAMLEndpoint {
         if (!subjectConfirmationDataElement.hasAttribute("Recipient")) {
             return "SpidSamlCheck_nr58";
         }
-        
+
+        // 59: Assertion > Subject > Confirmation > SubjectConfirmationData > different than AssertionConsumerServiceURL
+        String assertionConsumerServiceURL = authSession.getClientNote(JBossSAMLConstants.ASSERTION_CONSUMER_SERVICE_URL.name());
+        String recipient = subjectConfirmationDataElement.getAttribute("Recipient");
+        if(!StringUtil.isNullOrEmpty(recipient) && !recipient.trim().equals(assertionConsumerServiceURL.trim())){
+                return "SpidSamlCheck_59";
+        }
+
         // 57: Assertion > Subject > Confirmation > SubjectConfirmationData > Recipient is empty
         String subjectConfirmationDataRecipientValue = subjectConfirmationDataElement.getAttribute("Recipient");
         if (subjectConfirmationDataRecipientValue.isEmpty()) {
@@ -970,7 +1198,198 @@ public class SpidSAMLEndpoint {
             return "SpidSamlCheck_nr62";
         }
 
+        // 64:  Assertion > Subject > Confirmation > SubjectConfirmationData > NotOnOrAfter missing
+        String notOnOrAfter = subjectConfirmationDataElement.getAttribute("NotOnOrAfter");
+        if(StringUtil.isNullOrEmpty(notOnOrAfter.trim())){
+            return "SpidSamlCheck_64";
+        }
+
+        try {
+            // 66:  Assertion > Subject > Confirmation > SubjectConfirmationData > NotOnOrAfter before response reception
+            XMLGregorianCalendar notOnOrAfterXMLGregorian = DatatypeFactory.newInstance().
+                    newXMLGregorianCalendar(notOnOrAfter);
+            XMLGregorianCalendar now = DatatypeFactory.newInstance().newXMLGregorianCalendar(new GregorianCalendar());
+
+            if(notOnOrAfterXMLGregorian.compare(now) == DatatypeConstants.LESSER){
+                return "SpidSamlCheck_66";
+            }
+
+        } catch (DatatypeConfigurationException e) {
+            logger.error("Could not convert request NotOnOrAfter to XMLGregorianCalendar, wrong format?");
+            return "SpidFault_ErrorCode_nr3";
+        }
+        // 67:  Assertion > Issuer non specified
+        Element issuerElement = getDocumentElement(assertionElement, "Issuer");
+        if(issuerElement!=null &&
+                (issuerElement.getFirstChild()==null ||
+                StringUtil.isNullOrEmpty(issuerElement.getFirstChild().getNodeValue()))){
+            return "SpidSamlCheck_67";
+
+        }
+        // 68:  Assertion > Issuer missing
+        if(issuerElement==null){
+            return "SpidSamlCheck_68";
+
+        }
+
+        //69 Assertion > Issuer != entityID idp
+        if(!issuerElement.getFirstChild().getNodeValue().equals(config.getIdpEntityId())){
+            return "SpidSamlCheck_69";
+        }
+        //70 71 Assertion > Issuer > Format not specified or null
+        String format = issuerElement.getAttribute("Format");
+        if(StringUtil.isNullOrEmpty(format)){
+            return "SpidSamlCheck_7071";
+        }
+
+        //72 Assertion > Issuer > Format different than constant
+        if(!format.equals(ASSERTION_ISSUER_FORMAT)){
+            return "SpidSamlCheck_72";
+        }
+
+        //73 Assertion > Conditions missing
+        Element conditionsElement = getDocumentElement(assertionElement, "Conditions");
+        if(conditionsElement != null && !hasNamedChild(conditionsElement)){
+            return "SpidSamlCheck_73";
+        }
+        //74 Assertion > Conditions is null
+        if(conditionsElement==null){
+            return "SpidSamlCheck_74";
+        }
+        //75-76 Assertion > Conditions > NotBefore null or empty
+        String notBefore = conditionsElement.getAttribute("NotBefore");
+        if(StringUtil.isNullOrEmpty(notBefore)){
+            return "SpidSamlCheck_7576";
+        }
+
+        //78 Assertion > Condition > NotBefore after response
+        try {
+            XMLGregorianCalendar notBeforeXmlGregorian = DatatypeFactory.newInstance().
+                    newXMLGregorianCalendar(notBefore);
+            XMLGregorianCalendar now = DatatypeFactory.newInstance().newXMLGregorianCalendar(new GregorianCalendar());
+
+            if(notBeforeXmlGregorian.compare(now) == DatatypeConstants.GREATER){
+                return "SpidSamlCheck_78";
+            }
+
+        } catch (DatatypeConfigurationException e) {
+            logger.error("Could not convert request NotOnOrAfter to XMLGregorianCalendar, wrong format?");
+            return "SpidFault_ErrorCode_nr3";
+        }
+
+        //79-80 Assertion > Condition > NotOnOrAfter missing or not specified
+        String conditionsNotOnOrAfter = conditionsElement.getAttribute("NotOnOrAfter");
+        if(StringUtil.isNullOrEmpty(conditionsNotOnOrAfter.trim())){
+            return "SpidSamlCheck_7980";
+        }
+
+        //82 Assertion > Condition > NotOnOrAfter before response
+        try {
+            XMLGregorianCalendar conditionsNotOnOrAfterXmlGregorian = DatatypeFactory.newInstance().
+                    newXMLGregorianCalendar(conditionsNotOnOrAfter);
+            XMLGregorianCalendar now = DatatypeFactory.newInstance().newXMLGregorianCalendar(new GregorianCalendar());
+
+            if(conditionsNotOnOrAfterXmlGregorian.compare(now) == DatatypeConstants.LESSER){
+                return "SpidSamlCheck_82";
+            }
+
+        } catch (DatatypeConfigurationException e) {
+            logger.error("Could not convert request NotOnOrAfter to XMLGregorianCalendar, wrong format?");
+            return "SpidFault_ErrorCode_nr3";
+        }
+
+        //86 Assertion > Condition > Audience > AudienceRestriction missing (note: testing tool xml same as #83)
+        Element audienceRestrictionElement = getDocumentElement(conditionsElement, "AudienceRestriction");
+        Element audience = getDocumentElement(audienceRestrictionElement, "Audience");
+
+        //83 Assertion > Condition > AudienceRestriction not specified
+        if(!hasNamedChild(audienceRestrictionElement)){
+            return "SpidSamlCheck_83";
+        }
+
+        //85  86 Assertion > Condition > AudienceRestriction > Audience not specified or missing (note: testing tool 86 xml same as #83)
+        if(audience == null || audience.getFirstChild() == null || StringUtil.isNullOrEmpty(audience.getFirstChild().getNodeValue()) ){
+            return "SpidSamlCheck_8586";
+        }
+
+
+
+        //84 Assertion > Condition > AudienceRestriction null (testing tool yaml snippet same as #73)
+        if(audienceRestrictionElement==null){
+            return "SpidSamlCheck_84";
+        }
+
+        //87 Assertion > Condition > AudienceRestriction > Audience != EntityID SP
+        String spEntityId = config.getEntityId();
+        if(audience.getFirstChild()!= null &&
+                !StringUtil.isNullOrEmpty(audience.getFirstChild().getNodeValue()) &&
+                !audience.getFirstChild().getNodeValue().equals(spEntityId)){
+
+            return  "SpidSamlCheck_87";
+
+        }
+
+        //88 Assertion > AuthnStatement not specified
+        Element authnStatement = getDocumentElement(assertionElement, "AuthnStatement");
+        if(authnStatement!= null && !hasNamedChild(authnStatement)){
+            return  "SpidSamlCheck_88";
+        }
+        //89 Assertion > AuthnStatement null
+        if(authnStatement==null){
+            return  "SpidSamlCheck_89";
+
+        }
+        //90 Assertion > AuthnStatement > AuthnContext not specified
+        Element authnContextElement = getDocumentElement(authnStatement, "AuthnContext");
+        if(authnContextElement!= null && !hasNamedChild(authnContextElement)){
+            return  "SpidSamlCheck_90";
+        }
+        //91 Assertion > AuthnContext > AuthnStatement null note: from IDP same xml response block as #88
+        if(authnContextElement==null){
+            return  "SpidSamlCheck_91";
+
+        }
+
+        //92 Assertion > AuthnStatement > AuthnContextClassRef unspecified
+        Element authnContextClassRef = getDocumentElement(authnContextElement, "AuthnContextClassRef");
+        if(authnContextClassRef!= null &&
+                (authnContextClassRef.getFirstChild() == null ||
+           StringUtil.isNullOrEmpty(authnContextClassRef.getFirstChild().getNodeValue()))){
+            return  "SpidSamlCheck_92";
+
+        }
+
+        //93 Assertion > AuthnStatement > AuthnContextClassRef missing note: response snippet same as #90
+        if(authnContextClassRef==null){
+            return  "SpidSamlCheck_93";
+        }
+        /**
+         *nota: se vi sono più spidLevel specificati in keycloak, la response avrà sempre e solo il primo
+         * Non essendo specificato nel tool il preciso comportamento in casi di vari livelli configurati ma solo uno
+         * inviato dalla request, si sceglie di controllare che il livello della response sia contenuto tra i livelli
+         * configurati su kc (quindi nella config della request)
+         */
+        //94 Assertion > AuthContextClassRef spid level different from request. This block also implies #95 #96 #97
+        String responseSpidLevel = authnContextClassRef.getFirstChild().getNodeValue();
+        List<String> requestSpidLevels =Arrays.asList(config.getAuthnContextClassRefs().replaceAll("[\"\\[\\](){}]","").trim().split(","));
+        if(!requestSpidLevels.contains(responseSpidLevel)){
+            return  "SpidSamlCheck_94";
+        }
+
+        //98,99,100,103,104,105,106,107,108 caught by kc
+        //109 ok
+        //110 todo
+
+
+
+
+
         return null;
+    }
+
+    private Element getDocumentElement(Element assertionElement, String subject) {
+        return DocumentUtil.getChildElement(assertionElement,
+                new QName(JBossSAMLURIConstants.ASSERTION_NSURI.get(), subject));
     }
 
     private boolean hasNamedChild(Element element)
@@ -987,4 +1406,5 @@ public class SpidSAMLEndpoint {
 
         return false;
     }
+
 }

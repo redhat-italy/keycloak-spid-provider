@@ -11,6 +11,14 @@
     <form class="form-horizontal" name="realmForm" novalidate kc-read-only="!access.manageIdentityProviders">
         <fieldset>
             <div class="form-group clearfix">
+                <label class="col-md-2 control-label" for="idpEntityId">{{:: 'identity-provider.spid.idpEntityId' | translate}}</label>
+                <div class="col-sm-6">
+                    <input class="form-control" id="idpEntityId" type="text"  ng-model="identityProvider.config.idpEntityId"  readonly>
+                </div>
+            </div>
+        </fieldset>
+        <fieldset>
+            <div class="form-group clearfix">
                 <label class="col-md-2 control-label" for="redirectUri">{{:: 'redirect-uri' | translate}}</label>
                 <div class="col-sm-6">
                     <input class="form-control" id="redirectUri" type="text" value="{{callbackUrl}}{{identityProvider.alias}}/endpoint" readonly kc-select-action="click">

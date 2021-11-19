@@ -132,6 +132,7 @@ public class SpidIdentityProviderFactory extends AbstractIdentityProviderFactory
                     samlIdentityProviderConfig.setPostBindingAuthnRequest(postBindingResponse);
                     samlIdentityProviderConfig.setPostBindingLogout(postBindingLogout);
                     samlIdentityProviderConfig.setLoginHint(false);
+                    samlIdentityProviderConfig.setIdpEntityId(entityType.getEntityID());
 
                     List<String> nameIdFormatList = idpDescriptor.getNameIDFormat();
                     if (nameIdFormatList != null && !nameIdFormatList.isEmpty())

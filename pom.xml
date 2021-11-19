@@ -6,14 +6,14 @@
   -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    <groupId>com.github.lscorcia</groupId>
+    <groupId>com.github.redhatitaly</groupId>
     <artifactId>keycloak-spid-provider</artifactId>
     <version>1.0.11-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <name>Keycloak SPID Service Provider</name>
     <description>A Keycloak Service Provider for the Italian SPID Federation</description>
-    <url>https://github.com/italia/spid-keycloak-provider</url>
+    <url>https://github.com/redhat-italy/keycloak-spid-provider</url>
 
     <properties>
         <maven.compiler.source>1.8</maven.compiler.source>
@@ -21,17 +21,22 @@
         <failOnMissingWebXml>false</failOnMissingWebXml>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
-        <version.keycloak>15.0.0</version.keycloak>
+        <version.keycloak>15.0.2.redhat-00001</version.keycloak>
         <slf4j-api.version>1.7.30</slf4j-api.version>
         <junit.version>4.13.2</junit.version>
     </properties>
 
     <scm>
-        <developerConnection>scm:git:https://github.com/italia/spid-keycloak-provider.git</developerConnection>
+        <developerConnection>scm:git:https://github.com/redhat-italy/keycloak-spid-provider.git</developerConnection>
         <tag>HEAD</tag>
     </scm>
 
     <dependencies>
+        <dependency>
+            <groupId>org.wildfly.plugins</groupId>
+            <artifactId>wildfly-maven-plugin</artifactId>
+            <version>2.0.2.Final</version>
+        </dependency>
         <dependency>
             <groupId>org.keycloak</groupId>
             <artifactId>keycloak-core</artifactId>
@@ -87,6 +92,16 @@
         <finalName>spid-provider</finalName>
         <pluginManagement>
             <plugins>
+                <plugin>
+                    <groupId>org.wildfly.plugins</groupId>
+                    <artifactId>wildfly-maven-plugin</artifactId>
+                    <version>2.0.2.Final</version>
+                    <configuration>
+                        <skip>false</skip>
+                        <!-- ATTENTION!  FOR DEV PURPOSES SET THE APPROPRIATE JBOSS MNGMT PORT ON YOUR HOST!-->
+                        <port>9993</port>
+                    </configuration>
+                </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-release-plugin</artifactId>

@@ -25,6 +25,7 @@ import org.keycloak.broker.provider.IdentityProviderDataMarshaller;
 import org.keycloak.broker.provider.IdentityProviderMapper;
 import org.keycloak.broker.provider.util.SimpleHttp;
 import org.keycloak.broker.saml.SAMLDataMarshaller;
+import org.keycloak.broker.spid.mappers.SamlProtocolExtension;
 import org.keycloak.common.util.PemUtils;
 import org.keycloak.crypto.Algorithm;
 import org.keycloak.crypto.KeyStatus;
@@ -61,6 +62,7 @@ import org.keycloak.saml.SPMetadataDescriptor;
 import org.keycloak.saml.SamlProtocolExtensionsAwareBuilder.NodeGenerator;
 import org.keycloak.saml.SignatureAlgorithm;
 import org.keycloak.saml.common.constants.GeneralConstants;
+import org.keycloak.saml.common.constants.JBossSAMLConstants;
 import org.keycloak.saml.common.constants.JBossSAMLURIConstants;
 import org.keycloak.saml.common.exceptions.ConfigurationException;
 import org.keycloak.saml.common.util.DocumentUtil;
@@ -195,7 +197,16 @@ public class SpidIdentityProvider extends AbstractIdentityProvider<SpidIdentityP
             }
 
             // Save the current RequestID in the Auth Session as we need to verify it against the ID returned from the IdP
-            request.getAuthenticationSession().setClientNote(SamlProtocol.SAML_REQUEST_ID, authnRequest.getID());
+            /*
+            Workaround per https://issues.redhat.com/browse/KEYCLOAK-19143
+            https://github.com/keycloak/keycloak/blob/master/services/src/main/java/org/keycloak/broker/saml/SAMLIdentityProvider.java#L192
+            https://github.com/keycloak/keycloak/commit/4518b3d3d11a7e5941a97863702cf26b0b1ad8fc
+            */
+            request.getAuthenticationSession().setClientNote(SamlProtocolExtension.SAML_REQUEST_ID_BROKER, authnRequest.getID());
+
+            //stessa strategia per il controllo della issue instant, e dell'assertionConsumerServiceURL della request e quella della response da fare in SpidSAMLEndpoint.java
+            request.getAuthenticationSession().setClientNote(JBossSAMLConstants.ISSUE_INSTANT.name(), authnRequest.getIssueInstant().toString());
+            request.getAuthenticationSession().setClientNote(JBossSAMLConstants.ASSERTION_CONSUMER_SERVICE_URL.name(), authnRequest.getAssertionConsumerServiceURL().toString());
 
             if (postBinding) {
                 return binding.postBinding(authnRequestBuilder.toDocument()).request(destinationUrl);

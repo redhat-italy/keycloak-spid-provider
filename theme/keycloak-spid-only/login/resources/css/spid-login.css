@@ -1,0 +1,49 @@
+body {
+    font-size: 0.9em;
+}
+
+.card-pf {
+    max-width: 600px;
+}
+
+.spid-title {
+    display: block;
+    font-size: 2em;
+    margin-bottom: 15px;
+    border-color: #666666;
+    border-style: none;
+    border-width: 0 0 1px 0;
+}
+
+.spid-info {
+    display: block;
+    margin-bottom: 15px;
+}
+
+.spid-info-links {
+    display: block;
+    text-align: right;
+    margin-bottom: 15px;
+}
+
+.spid-info-link {
+    display: block;
+}
+
+.spid-idp-button-box {
+    font-size: 0.85em;
+    display: block;
+    margin-bottom: auto 0px 0px auto;
+    text-align: left;
+    margin-top: 15px;
+    padding-top: 15px;
+    border-color: #666666;
+    border-style: solid;
+    border-width: 1px 0 0 0;
+}
+
+.spid-logo {
+    width: 60%;
+    margin: 35px auto 0px auto;
+    text-align: center;
+}
