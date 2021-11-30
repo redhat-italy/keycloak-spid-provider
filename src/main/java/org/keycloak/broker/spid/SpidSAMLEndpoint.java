@@ -624,7 +624,17 @@ public class SpidSAMLEndpoint {
         public Response handleSamlResponse(String samlResponse, String relayState, String clientId) {
             SAMLDocumentHolder holder = extractResponseDocument(samlResponse);
             if (holder == null) {
-                return getResponse(Errors.INVALID_SAML_DOCUMENT, Errors.INVALID_SAML_RESPONSE, Messages.INVALID_FEDERATED_IDENTITY_ACTION);
+                // ADDED AUTH SESSION SET
+                AuthenticationSessionModel authSession = getAuthenticationSessionModel(relayState, clientId);
+                session.getContext().setAuthenticationSession(authSession);
+
+                event.event(EventType.IDENTITY_PROVIDER_RESPONSE);
+                event.detail(Details.REASON, Errors.INVALID_SAML_DOCUMENT);
+                event.error(Errors.INVALID_SAML_RESPONSE);
+                return callback.error("SpidSamlCheck_GenericResponseParsingError");
+
+                // ORIGINAL BEHAVIOUR
+                // return getResponse(Errors.INVALID_SAML_DOCUMENT, Errors.INVALID_SAML_RESPONSE, Messages.INVALID_FEDERATED_IDENTITY_ACTION);
             }
             StatusResponseType statusResponse = (StatusResponseType)holder.getSamlObject();
 
@@ -632,20 +642,47 @@ public class SpidSAMLEndpoint {
             // validate destination
             if (isDestinationRequired()
                     && statusResponse.getDestination() == null && containsUnencryptedSignature(holder)) {
-                return getResponse(Errors.MISSING_REQUIRED_DESTINATION, Errors.INVALID_SAML_LOGOUT_RESPONSE, Messages.INVALID_REQUEST);
+                // ADDED AUTH SESSION SET
+                AuthenticationSessionModel authSession = getAuthenticationSessionModel(relayState, clientId);
+                session.getContext().setAuthenticationSession(authSession);
+
+                event.event(EventType.IDENTITY_PROVIDER_RESPONSE);
+                event.detail(Details.REASON, Errors.MISSING_REQUIRED_DESTINATION);
+                event.error(Errors.INVALID_SAML_LOGOUT_RESPONSE);
+                return callback.error("SpidSamlCheck_GenericResponseParsingError");
+
+                // ORIGINAL BEHAVIOUR
+                //  return getResponse(Errors.MISSING_REQUIRED_DESTINATION, Errors.INVALID_SAML_LOGOUT_RESPONSE, Messages.INVALID_REQUEST);
             }
 
             if (! destinationValidator.validate(getExpectedDestination(config.getAlias(), clientId), statusResponse.getDestination())) {
-                return getResponse(Errors.INVALID_DESTINATION, Errors.INVALID_SAML_RESPONSE, Messages.INVALID_REQUEST);
+                // ADDED AUTH SESSION SET
+                AuthenticationSessionModel authSession = getAuthenticationSessionModel(relayState, clientId);
+                session.getContext().setAuthenticationSession(authSession);
+
+                event.event(EventType.IDENTITY_PROVIDER_RESPONSE);
+                event.detail(Details.REASON, Errors.INVALID_DESTINATION);
+                event.error(Errors.INVALID_SAML_RESPONSE);
+                return callback.error("SpidSamlCheck_GenericResponseParsingError");
+
+                // ORIGINAL BEHAVIOUR
+                // return getResponse(Errors.INVALID_DESTINATION, Errors.INVALID_SAML_RESPONSE, Messages.INVALID_REQUEST);
             }
             if (config.isValidateSignature()) {
                 try {
                     verifySignature(GeneralConstants.SAML_RESPONSE_KEY, holder);
                 } catch (VerificationException e) {
+                    // ADDED AUTH SESSION SET
+                    AuthenticationSessionModel authSession = getAuthenticationSessionModel(relayState, clientId);
+                    session.getContext().setAuthenticationSession(authSession);
+
                     logger.error("validation failed", e);
                     event.event(EventType.IDENTITY_PROVIDER_RESPONSE);
                     event.error(Errors.INVALID_SIGNATURE);
-                    return ErrorPage.error(session, null, Response.Status.BAD_REQUEST, Messages.INVALID_FEDERATED_IDENTITY_ACTION);
+                    return callback.error("SpidSamlCheck_04");
+
+                    // ORIGINAL BEHAVIOUR
+                    // return ErrorPage.error(session, null, Response.Status.BAD_REQUEST, Messages.INVALID_FEDERATED_IDENTITY_ACTION);
                 }
             }
             if (statusResponse instanceof ResponseType) {
