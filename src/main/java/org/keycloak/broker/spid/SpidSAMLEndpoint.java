@@ -24,7 +24,6 @@ import org.jboss.resteasy.spi.ResteasyProviderFactory;
 import org.keycloak.broker.provider.BrokeredIdentityContext;
 import org.keycloak.broker.provider.IdentityBrokerException;
 import org.keycloak.broker.provider.IdentityProvider;
-import org.keycloak.broker.spid.mappers.SamlProtocolExtension;
 import org.keycloak.common.ClientConnection;
 import org.keycloak.common.VerificationException;
 import org.keycloak.dom.saml.v2.assertion.AssertionType;
@@ -450,7 +449,7 @@ public class SpidSAMLEndpoint {
                 }
 
                 // Apply SPID-specific response validation rules
-                String spidExpectedRequestId = authSession.getClientNote(SamlProtocolExtension.SAML_REQUEST_ID_BROKER);
+                String spidExpectedRequestId = authSession.getClientNote(SamlProtocol.SAML_REQUEST_ID_BROKER);
                 String spidResponseValidationError = verifySpidResponse(holder.getSamlDocument().getDocumentElement(),
                         assertionElement,
                         spidExpectedRequestId,
@@ -466,7 +465,7 @@ public class SpidSAMLEndpoint {
                 }
 
                 // Validate InResponseTo attribute: must match the generated request ID
-                String expectedRequestId = authSession.getClientNote(SamlProtocolExtension.SAML_REQUEST_ID_BROKER);
+                String expectedRequestId = authSession.getClientNote(SamlProtocol.SAML_REQUEST_ID_BROKER);
                 final boolean inResponseToValidationSuccess = validateInResponseToAttribute(responseType, expectedRequestId);
                 if (!inResponseToValidationSuccess)
                 {
