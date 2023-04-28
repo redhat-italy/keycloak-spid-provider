@@ -455,9 +455,8 @@
                     </div>
                 </div>
                 <kc-tooltip>{{:: 'identity-provider.saml.authncontext-class-ref.tooltip' | translate}}</kc-tooltip>
-                    
-                    
-                    <!--
+                    <!-- authnContextClassRef is a List. SPID wants only a string. -->
+                    <!--  this is why this code is commented
                     <div class="input-group" ng-repeat="(i, authnContextClassRef) in authnContextClassRefs track by $index">
                         <input class="form-control" ng-model="authnContextClassRefs[i]">
                         <div class="input-group-btn">

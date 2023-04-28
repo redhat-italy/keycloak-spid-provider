@@ -53,15 +53,9 @@
                       <li class="spid-idp-button-link" id="timid" data-idp="timid">
                           <a href="#"><span class="spid-sr-only">Tim ID</span><img src="${url.resourcesPath}/img/spid-idp-timid.svg" onerror="this.src='img/spid-idp-timid.png'; this.onerror=null;" alt="Tim ID" /></a>
                       </li>
-                      <li class="spid-idp-button-link" id="spid-demo" data-idp="spid-demo">
-                          <a href="#"><span class="spid-sr-only">spid-demo</span><img src="" alt="spid-demo" /></a>
+                      <li class="spid-idp-button-link" id="spidtestidp" data-idp="spidtestidp">
+                          <a href="#"><span class="spid-sr-only">spidtestidp</span><img src="${url.resourcesPath}/img/spid-idp-test.svg" alt="spidtestidp" /> SPID SAML Check</a>
                       </li>
-                       <li class="spid-idp-button-link" id="spid-validator" data-idp="spid-validator">
-                          <a href="#"><span class="spid-sr-only">spid-validator</span><img src="" alt="spid-validator" /></a>
-                       </li>
-                        <li class="spid-idp-button-link" id="spidtestidp" data-idp="spidtestidp">
-                          <a href="#"><span class="spid-sr-only">spidtestidp</span><img src="" alt="spidtestidp" /></a>
-                       </li>
                       <li class="spid-idp-support-link">
                           <a href="https://www.spid.gov.it">Maggiori informazioni</a>
                       </li>
@@ -99,8 +93,6 @@
             }
 
             window.spidprovidermatch = {
-                "spid-demo": "spid-demo",
-                "spid-validator": "spid-validator",
                 "spidtestidp": "spidtestidp",
                 "SPIDItalia Register.it": "spiditalia",
                 "Aruba ID": "arubaid",
