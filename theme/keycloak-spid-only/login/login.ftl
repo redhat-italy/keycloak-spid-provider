@@ -53,9 +53,6 @@
                       <li class="spid-idp-button-link" id="spiditalia" data-idp="spiditalia">
                           <a href="#"><span class="spid-sr-only">SPIDItalia Register.it</span><img src="${url.resourcesPath}/img/spid-idp-spiditalia.svg" onerror="this.src='img/spid-idp-spiditalia.png'; this.onerror=null;" alt="SpidItalia" /></a>
                       </li>
-                      <li class="spid-idp-button-link" id="sielteid" data-idp="sielteid">
-                          <a href="#"><span class="spid-sr-only">Sielte ID</span><img src="${url.resourcesPath}/img/spid-idp-sielteid.svg" onerror="this.src='img/spid-idp-sielteid.png'; this.onerror=null;" alt="Sielte ID" /></a>
-                      </li>
                       <li class="spid-idp-button-link" id="timid" data-idp="timid">
                           <a href="#"><span class="spid-sr-only">Tim ID</span><img src="${url.resourcesPath}/img/spid-idp-timid.svg" onerror="this.src='img/spid-idp-timid.png'; this.onerror=null;" alt="Tim ID" /></a>
                       </li>
@@ -100,15 +97,17 @@
 
             window.spidprovidermatch = {
                 "spidtestidp": "spidtestidp",
-                "SPIDItalia Register.it": "spiditalia",
                 "Aruba ID": "arubaid",
+                "Etna ID": "etnaid",
+                "Infocert ID": "infocertid",
+                "Intesa ID": "intesaid",
+                "Lepida ID": "lepidaid",
+                "Namirial ID": "namirialid",
                 "Poste ID": "posteid",
                 "Sielte ID": "sielteid",
-                "Tim ID": "timid",
-                "Lepida ID": "lepidaid",
-                "Infocert ID": "infocertid",
-                "Namirial ID": "namirialid",
-                "Intesa ID": "intesaid",
+                "SPIDItalia Register.it": "spiditalia",
+                "TeamSystem ID": "teamsystemid",
+                "Tim ID": "timid"
             }
             $(document).ready(function(){
                 for (const [key, value] of Object.entries(spidprovidermatch)) {
