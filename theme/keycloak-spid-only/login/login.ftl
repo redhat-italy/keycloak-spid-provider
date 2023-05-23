@@ -29,11 +29,17 @@
                       <li class="spid-idp-button-link" id="arubaid" data-idp="arubaid">
                           <a href="#"><span class="spid-sr-only">Aruba ID</span><img src="${url.resourcesPath}/img/spid-idp-arubaid.svg" onerror="this.src='img/spid-idp-arubaid.png'; this.onerror=null;" alt="Aruba ID" /></a>
                       </li>
+                      <li class="spid-idp-button-link" id="teamsystemid" data-idp="teamsystemid">
+                          <a href="#"><span class="spid-sr-only">TeamSystem ID</span><img src="${url.resourcesPath}/img/spid-idp-teamsystemid.svg" onerror="this.src='img/spid-idp-teamsystemid.png'; this.onerror=null;" alt="TeamSystem ID" /></a>
+                      </li>
+                      <li class="spid-idp-button-link" id="etnaid" data-idp="etnaid">
+                           <a href="#"><span class="spid-sr-only">Etna ID</span><img src="${url.resourcesPath}/img/spid-idp-etnaid.svg" onerror="this.src='img/spid-idp-etnaid.png'; this.onerror=null;" alt="Etna ID" /></a>
+                      </li>
+                      <li class="spid-idp-button-link" id="sielteid" data-idp="sielteid">
+                           <a href="#"><span class="spid-sr-only">Sielte ID</span><img src="${url.resourcesPath}/img/spid-idp-sielte.svg" onerror="this.src='img/spid-idp-sielte.png'; this.onerror=null;" alt="Sielte ID" /></a>
+                      </li>
                       <li class="spid-idp-button-link" id="infocertid" data-idp="infocertid">
                           <a href="#"><span class="spid-sr-only">Infocert ID</span><img src="${url.resourcesPath}/img/spid-idp-infocertid.svg" onerror="this.src='img/spid-idp-infocertid.png'; this.onerror=null;" alt="Infocert ID" /></a>
-                      </li>
-                      <li class="spid-idp-button-link" id="intesaid" data-idp="intesaid">
-                          <a href="#"><span class="spid-sr-only">Intesa ID</span><img src="${url.resourcesPath}/img/spid-idp-intesaid.svg" onerror="this.src='img/spid-idp-intesaid.png'; this.onerror=null;" alt="Intesa ID" /></a>
                       </li>
                       <li class="spid-idp-button-link" id="lepidaid" data-idp="lepidaid">
                           <a href="#"><span class="spid-sr-only">Lepida ID</span><img src="${url.resourcesPath}/img/spid-idp-lepidaid.svg" onerror="this.src='img/spid-idp-lepidaid.png'; this.onerror=null;" alt="Lepida ID" /></a>
