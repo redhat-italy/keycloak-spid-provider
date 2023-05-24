@@ -41,6 +41,9 @@
                       <li class="spid-idp-button-link" id="infocertid" data-idp="infocertid">
                           <a href="#"><span class="spid-sr-only">Infocert ID</span><img src="${url.resourcesPath}/img/spid-idp-infocertid.svg" onerror="this.src='img/spid-idp-infocertid.png'; this.onerror=null;" alt="Infocert ID" /></a>
                       </li>
+                      <li class="spid-idp-button-link" id="infocamereid" data-idp="infocamereid">
+                          <a href="#"><span class="spid-sr-only">Infocamere ID</span><img src="${url.resourcesPath}/img/spid-idp-infocamereid.svg" onerror="this.src='img/spid-idp-infocamereid.png'; this.onerror=null;" alt="Infocamere ID" /></a>
+                      </li>
                       <li class="spid-idp-button-link" id="lepidaid" data-idp="lepidaid">
                           <a href="#"><span class="spid-sr-only">Lepida ID</span><img src="${url.resourcesPath}/img/spid-idp-lepidaid.svg" onerror="this.src='img/spid-idp-lepidaid.png'; this.onerror=null;" alt="Lepida ID" /></a>
                       </li>
@@ -50,7 +53,7 @@
                       <li class="spid-idp-button-link" id="posteid" data-idp="posteid">
                           <a href="#"><span class="spid-sr-only">Poste ID</span><img src="${url.resourcesPath}/img/spid-idp-posteid.svg" onerror="this.src='img/spid-idp-posteid.png'; this.onerror=null;" alt="Poste ID" /></a>
                       </li>
-                      <li class="spid-idp-button-link" id="spiditalia" data-idp="spiditalia">
+                      <li class="spid-idp-button-link" id="spiditaliaid" data-idp="spiditaliaid">
                           <a href="#"><span class="spid-sr-only">SPIDItalia Register.it</span><img src="${url.resourcesPath}/img/spid-idp-spiditalia.svg" onerror="this.src='img/spid-idp-spiditalia.png'; this.onerror=null;" alt="SpidItalia" /></a>
                       </li>
                       <li class="spid-idp-button-link" id="timid" data-idp="timid">
@@ -101,11 +104,12 @@
                 "Etna ID": "etnaid",
                 "Infocert ID": "infocertid",
                 "Intesa ID": "intesaid",
+                "Inforcamere ID": "infocamereid",
                 "Lepida ID": "lepidaid",
                 "Namirial ID": "namirialid",
                 "Poste ID": "posteid",
                 "Sielte ID": "sielteid",
-                "SPIDItalia Register.it": "spiditalia",
+                "SPIDItalia Register.it": "spiditaliaid",
                 "TeamSystem ID": "teamsystemid",
                 "Tim ID": "timid"
             }
