@@ -1408,7 +1408,7 @@
         "linkOnly": false,
         "firstBrokerLoginFlowAlias": "First Broker Login SPID",
         "config": {
-          "authnContextClassRefs": "[\"https://www.spid.gov.it/SpidL2\"]",
+          "authnContextClassRefs": "[\"https://www.spid.gov.it/SpidL3\"]",
           "otherContactPhone": "+3905750505",
           "postBindingLogout": "true",
           "postBindingResponse": "true",
@@ -1521,7 +1521,7 @@
           "loginHint": "false",
           "allowCreate": "true",
           "organizationNames": "it|TeamSystem s.p.a.,en|TeamSystem s.p.a.",
-          "authnContextComparisonType": "minimum",
+          "authnContextComparisonType": "exact",
           "syncMode": "FORCE",
           "singleSignOnServiceUrl": "https://spid.teamsystem.com/idp/sso/post",
           "wantAuthnRequestsSigned": "true",
@@ -1609,7 +1609,7 @@
         "linkOnly": false,
         "firstBrokerLoginFlowAlias": "First Broker Login SPID",
         "config": {
-          "authnContextClassRefs": "[\"https://www.spid.gov.it/SpidL2\"]",
+          "authnContextClassRefs": "[\"https://www.spid.gov.it/SpidL3\"]",
           "otherContactPhone": "+3907736551",
           "postBindingLogout": "true",
           "postBindingResponse": "true",
@@ -1659,7 +1659,7 @@
         "linkOnly": false,
         "firstBrokerLoginFlowAlias": "First Broker Login SPID",
         "config": {
-          "authnContextClassRefs": "[\"https://www.spid.gov.it/SpidL2\"]",
+          "authnContextClassRefs": "[\"https://www.spid.gov.it/SpidL3\"]",
           "otherContactPhone": "+3907736551",
           "postBindingLogout": "true",
           "postBindingResponse": "true",
@@ -1709,7 +1709,7 @@
         "linkOnly": false,
         "firstBrokerLoginFlowAlias": "First Broker Login SPID",
         "config": {
-          "authnContextClassRefs": "[\"https://www.spid.gov.it/SpidL2\"]",
+          "authnContextClassRefs": "[\"https://www.spid.gov.it/SpidL3\"]",
           "otherContactPhone": "+3907736551",
           "postBindingLogout": "true",
           "postBindingResponse": "true",
@@ -1760,7 +1760,7 @@
         "linkOnly": false,
         "firstBrokerLoginFlowAlias": "First Broker Login SPID",
         "config": {
-          "authnContextClassRefs": "[\"https://www.spid.gov.it/SpidL2\"]",
+          "authnContextClassRefs": "[\"https://www.spid.gov.it/SpidL3\"]",
           "otherContactPhone": "+3907736551",
           "postBindingLogout": "true",
           "postBindingResponse": "true",
@@ -1862,7 +1862,7 @@
         "linkOnly": false,
         "firstBrokerLoginFlowAlias": "First Broker Login SPID",
         "config": {
-          "authnContextClassRefs": "[\"https://www.spid.gov.it/SpidL2\"]",
+          "authnContextClassRefs": "[\"https://www.spid.gov.it/SpidL3\"]",
           "otherContactPhone": "+3907736551",
           "postBindingLogout": "true",
           "postBindingResponse": "true",
