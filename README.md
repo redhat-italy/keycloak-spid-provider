@@ -1,13 +1,13 @@
 # keycloak-spid-provider
 
-Italian SPID authentication provider for Keycloak v.15.0.1+ (https://www.keycloak.org/)
+Italian SPID authentication provider for Keycloak v.18.0.3+ (https://www.keycloak.org/)
 
 This guide describe the steps required to successfully integrate a Keycloak environment with the SPID federation.
 
 ## Prerequisites
 
-- Keycloak full-working installation (version *15.0.1+*): the following instructions expect an environment variable named **$KC_HOME** to be set to the root directory of the Keycloak instance
-- a recent Docker installation
+- Keycloak full-working installation (version *18.0.3+*): the following instructions expect an environment variable named **$KC_HOME** to be set to the root directory of the Keycloak instance
+- a recent Docker (or podman) installation
 - JDK 8+
 - Git
 - Maven
