@@ -198,6 +198,10 @@ However, even if the username is the same, Keycloak will trigger by default an "
 
 ![Auth Flow](docs/img/auth_flow.png)
 
+If you need to configure all the current (May 2023) Italian SPID providers you can import, through the keycloak interface (Manage > import on realm's main menu), [this](docs/template-realm/realm-export.json) already configured realm. 
+
+**WARNING**: after importing the template you need to configure the identity provider mappers following [this paragraph](#configure-identity-provider-mappers) for *every* provider imported.
+
 ### Identity Provider configuration
 
 1. Select the *Identity Providers* item from the left menu, click on *Add provider*, then select *SPID*;
