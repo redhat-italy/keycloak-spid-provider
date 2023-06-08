@@ -29,11 +29,20 @@
                       <li class="spid-idp-button-link" id="arubaid" data-idp="arubaid">
                           <a href="#"><span class="spid-sr-only">Aruba ID</span><img src="${url.resourcesPath}/img/spid-idp-arubaid.svg" onerror="this.src='img/spid-idp-arubaid.png'; this.onerror=null;" alt="Aruba ID" /></a>
                       </li>
+                      <li class="spid-idp-button-link" id="teamsystemid" data-idp="teamsystemid">
+                          <a href="#"><span class="spid-sr-only">TeamSystem ID</span><img src="${url.resourcesPath}/img/spid-idp-teamsystemid.svg" onerror="this.src='img/spid-idp-teamsystemid.png'; this.onerror=null;" alt="TeamSystem ID" /></a>
+                      </li>
+                      <li class="spid-idp-button-link" id="etnaid" data-idp="etnaid">
+                           <a href="#"><span class="spid-sr-only">Etna ID</span><img src="${url.resourcesPath}/img/spid-idp-etnaid.svg" onerror="this.src='img/spid-idp-etnaid.png'; this.onerror=null;" alt="Etna ID" /></a>
+                      </li>
+                      <li class="spid-idp-button-link" id="sielteid" data-idp="sielteid">
+                           <a href="#"><span class="spid-sr-only">Sielte ID</span><img src="${url.resourcesPath}/img/spid-idp-sielte.svg" onerror="this.src='img/spid-idp-sielte.png'; this.onerror=null;" alt="Sielte ID" /></a>
+                      </li>
                       <li class="spid-idp-button-link" id="infocertid" data-idp="infocertid">
                           <a href="#"><span class="spid-sr-only">Infocert ID</span><img src="${url.resourcesPath}/img/spid-idp-infocertid.svg" onerror="this.src='img/spid-idp-infocertid.png'; this.onerror=null;" alt="Infocert ID" /></a>
                       </li>
-                      <li class="spid-idp-button-link" id="intesaid" data-idp="intesaid">
-                          <a href="#"><span class="spid-sr-only">Intesa ID</span><img src="${url.resourcesPath}/img/spid-idp-intesaid.svg" onerror="this.src='img/spid-idp-intesaid.png'; this.onerror=null;" alt="Intesa ID" /></a>
+                      <li class="spid-idp-button-link" id="infocamereid" data-idp="infocamereid">
+                          <a href="#"><span class="spid-sr-only">Infocamere ID</span><img src="${url.resourcesPath}/img/spid-idp-infocamereid.svg" onerror="this.src='img/spid-idp-infocamereid.png'; this.onerror=null;" alt="Infocamere ID" /></a>
                       </li>
                       <li class="spid-idp-button-link" id="lepidaid" data-idp="lepidaid">
                           <a href="#"><span class="spid-sr-only">Lepida ID</span><img src="${url.resourcesPath}/img/spid-idp-lepidaid.svg" onerror="this.src='img/spid-idp-lepidaid.png'; this.onerror=null;" alt="Lepida ID" /></a>
@@ -44,21 +53,15 @@
                       <li class="spid-idp-button-link" id="posteid" data-idp="posteid">
                           <a href="#"><span class="spid-sr-only">Poste ID</span><img src="${url.resourcesPath}/img/spid-idp-posteid.svg" onerror="this.src='img/spid-idp-posteid.png'; this.onerror=null;" alt="Poste ID" /></a>
                       </li>
-                      <li class="spid-idp-button-link" id="spiditalia" data-idp="spiditalia">
+                      <li class="spid-idp-button-link" id="spiditaliaid" data-idp="spiditaliaid">
                           <a href="#"><span class="spid-sr-only">SPIDItalia Register.it</span><img src="${url.resourcesPath}/img/spid-idp-spiditalia.svg" onerror="this.src='img/spid-idp-spiditalia.png'; this.onerror=null;" alt="SpidItalia" /></a>
-                      </li>
-                      <li class="spid-idp-button-link" id="sielteid" data-idp="sielteid">
-                          <a href="#"><span class="spid-sr-only">Sielte ID</span><img src="${url.resourcesPath}/img/spid-idp-sielteid.svg" onerror="this.src='img/spid-idp-sielteid.png'; this.onerror=null;" alt="Sielte ID" /></a>
                       </li>
                       <li class="spid-idp-button-link" id="timid" data-idp="timid">
                           <a href="#"><span class="spid-sr-only">Tim ID</span><img src="${url.resourcesPath}/img/spid-idp-timid.svg" onerror="this.src='img/spid-idp-timid.png'; this.onerror=null;" alt="Tim ID" /></a>
                       </li>
-                      <li class="spid-idp-button-link" id="spid-demo" data-idp="spid-demo">
-                          <a href="#"><span class="spid-sr-only">spid-demo</span><img src="" alt="spid-demo" /></a>
+                      <li class="spid-idp-button-link" id="spidtestidp" data-idp="spidtestidp">
+                          <a href="#"><span class="spid-sr-only">spidtestidp</span><img src="${url.resourcesPath}/img/spid-idp-test.svg" alt="spidtestidp" /> SPID SAML Check</a>
                       </li>
-                       <li class="spid-idp-button-link" id="spid-validator" data-idp="spid-validator">
-                          <a href="#"><span class="spid-sr-only">spid-validator</span><img src="" alt="spid-validator" /></a>
-                       </li>
                       <li class="spid-idp-support-link">
                           <a href="https://www.spid.gov.it">Maggiori informazioni</a>
                       </li>
@@ -96,17 +99,19 @@
             }
 
             window.spidprovidermatch = {
-                "spid-demo": "spid-demo",
-                "spid-validator": "spid-validator",
-                "SPIDItalia Register.it": "spiditalia",
+                "spidtestidp": "spidtestidp",
                 "Aruba ID": "arubaid",
+                "Etna ID": "etnaid",
+                "Infocert ID": "infocertid",
+                "Intesa ID": "intesaid",
+                "Inforcamere ID": "infocamereid",
+                "Lepida ID": "lepidaid",
+                "Namirial ID": "namirialid",
                 "Poste ID": "posteid",
                 "Sielte ID": "sielteid",
-                "Tim ID": "timid",
-                "Lepida ID": "lepidaid",
-                "Infocert ID": "infocertid",
-                "Namirial ID": "namirialid",
-                "Intesa ID": "intesaid",
+                "SPIDItalia Register.it": "spiditaliaid",
+                "TeamSystem ID": "teamsystemid",
+                "Tim ID": "timid"
             }
             $(document).ready(function(){
                 for (const [key, value] of Object.entries(spidprovidermatch)) {

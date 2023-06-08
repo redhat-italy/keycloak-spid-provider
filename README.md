@@ -1,13 +1,13 @@
 # keycloak-spid-provider
 
-Italian SPID authentication provider for Keycloak v.15.0.1+ (https://www.keycloak.org/)
+Italian SPID authentication provider for Keycloak v.18.0.3+ (https://www.keycloak.org/)
 
 This guide describe the steps required to successfully integrate a Keycloak environment with the SPID federation.
 
 ## Prerequisites
 
-- Keycloak full-working installation (version *15.0.1+*): the following instructions expect an environment variable named **$KC_HOME** to be set to the root directory of the Keycloak instance
-- a recent Docker installation
+- Keycloak full-working installation (version *18.0.3+*): the following instructions expect an environment variable named **$KC_HOME** to be set to the root directory of the Keycloak instance
+- a recent Docker (or podman) installation
 - JDK 8+
 - Git
 - Maven
@@ -148,6 +148,9 @@ docker exec -it spid-saml-check-idp-demo /bin/sh -c "ping host.docker.internal |
 
 It should print the IP address (for recent Docker versions on Windows/Mac it is usually 192.168.65.2).
 
+If you are using podman replace `host.docker.internal` with `host.containers.internal` in the command above. 
+In this case the IP address usually is 192.168.1.192. 
+
 Then execute the following command to set the `spidsp` hostname alias (inside the container) to the IP address, replacing the string `<IP-ADDRESS>` with the IP address printed by the previous command (e.g. 192.168.65.2).
 
 ```shell
@@ -193,6 +196,12 @@ However, even if the username is the same, Keycloak will trigger by default an "
 7. Set the *Requirement* column radio button of the *Automatically Set Existing User* execution to *Required*
 8. Set both the *Confirm Link Existing Account* and the *First Broker Login SPID Account Verification Options* radio buttons to *Disabled*.
 
+![Auth Flow](docs/img/auth_flow.png)
+
+If you need to configure all the current (May 2023) Italian SPID providers you can import, through the keycloak interface (Manage > import on realm's main menu), [this](docs/template-realm/realm-export.json) already configured realm. 
+
+**WARNING**: after importing the template you need to configure the identity provider mappers following [this paragraph](#configure-identity-provider-mappers) for *every* provider imported.
+
 ### Identity Provider configuration
 
 1. Select the *Identity Providers* item from the left menu, click on *Add provider*, then select *SPID*;
@@ -214,7 +223,8 @@ Fill in the other fields as follows (leave the other fields as set by default).
 
 
 #### SAML Config section
-- **Service Provider Entity ID**:  `http://<keycloak-base-url>/auth/realms/<your_realm_name>`
+- **Service Provider Entity ID**: `http://<keycloak-base-url>/auth/realms/<your_realm_name>`
+- **Single Sign-On Service URL**: 
 - **NameID Policy Format**: set select box to `Transient`
 - **Principal Type**: set to `Attribute [Name]`
 - **Principal Attribute**: appears when *Principal Type* is set. Set it to `fiscalNumber`
@@ -248,6 +258,8 @@ Here you can specify which SPID Level you want to request to the IdP:
 
 Save the configuration.
 
+![Example Config](docs/img/example_config.png)
+
 ### Configure Identity Provider Mappers
 
 Click on the *Mappers* tab in the newly created *Identity Provider* configuration
@@ -268,10 +280,10 @@ First Name and Last Name are required to identify the user and should be always 
 
 | Name | Mapper Type | Attribute Name | User Attribute Name | Sync Mode |
 | ---- | ---- | ---- | ---- | ---- |
-| First Name | SPID Attribute Importer | name | firstName | inherit |
-| Last Name | SPID Attribute Importer | familyName | lastName | inherit |
-| Tax Id | SPID Attribute Importer | fiscalNumber | spid-fiscalNumber | inherit |
-| Email | SPID Attribute Importer | email | spid-email | inherit |
+| First Name  | SPID Attribute Importer | name         | firstName         | inherit |
+| Last Name   | SPID Attribute Importer | familyName   | lastName          | inherit |
+| Tax Id      | SPID Attribute Importer | fiscalNumber | spid-fiscalNumber | inherit |
+| Email       | SPID Attribute Importer | email        | spid-email        | inherit |
 
 > *NOTE**
 > 
@@ -299,13 +311,17 @@ All of the other SPID attributes are optional and follow the same convention. Re
 | Company Address | SPID Attribute Importer | registeredOffice | spid-registeredOffice |
 | VAT Number | SPID Attribute Importer | ivaCode | spid-ivaCode |
 
+![Example mandatory mappers](docs/img/example_mandatory_mappers.png)
+
 ## Generating and configuring Service Provider metadata
 
 The SPID Service Provider metadata (xml) document can be automatically generated clicking on the *SPID Service Provider Metadata* link available in the *Identity Provider* configuration page (the same filled in the previous section) at the label *Endpoints*.
 
 The link has the following standard format:
 
- `http(s)://<host>:<port>/auth/realms/<your_realm_name>/spid-sp-metadata`
+ `http(s)://<host>:<port>/auth/realms/<your_realm_name>/spid-sp-metadata` 
+
+example: `http://spidsp:8082/auth/realms/spid/spid-sp-metadata`
 
 > **NOTE**
 > 

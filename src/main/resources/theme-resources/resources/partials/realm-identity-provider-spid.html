@@ -442,8 +442,21 @@
                 <kc-tooltip>{{:: 'identity-provider.saml.authncontext-comparison-type.tooltip' | translate}}</kc-tooltip>
             </div>
             <div class="form-group">
-                <label for="type" class="col-md-2 control-label">{{:: 'identity-provider.saml.authncontext-class-ref' | translate}}</label>
-                <div class="col-sm-4">
+                <label for="type" class="col-md-2 control-label"><span class="required">*</span>{{:: 'identity-provider.saml.authncontext-class-ref' | translate}}</label>
+                <div class="col-md-6">
+                    <div>
+                        <select class="form-control" id="authnContextClassRefs"
+                        ng-init="identityProvider.config.authnContextClassRefs = identityProvider.config.authnContextClassRefs"
+                        ng-model="identityProvider.config.authnContextClassRefs" required>
+                            <option value='["https://www.spid.gov.it/SpidL1"]'>https://www.spid.gov.it/SpidL1</option>
+                            <option value='["https://www.spid.gov.it/SpidL2"]'>https://www.spid.gov.it/SpidL2</option>
+                            <option value='["https://www.spid.gov.it/SpidL3"]'>https://www.spid.gov.it/SpidL3</option>
+                        </select>
+                    </div>
+                </div>
+                <kc-tooltip>{{:: 'identity-provider.saml.authncontext-class-ref.tooltip' | translate}}</kc-tooltip>
+                    <!-- authnContextClassRef is a List. SPID wants only a string. -->
+                    <!--  this is why this code is commented
                     <div class="input-group" ng-repeat="(i, authnContextClassRef) in authnContextClassRefs track by $index">
                         <input class="form-control" ng-model="authnContextClassRefs[i]">
                         <div class="input-group-btn">
@@ -460,8 +473,10 @@
                             </button>
                         </div>
                     </div>
+                    
                 </div>
                 <kc-tooltip>{{:: 'identity-provider.saml.authncontext-class-ref.tooltip' | translate}}</kc-tooltip>
+                -->
             </div>
             <div class="form-group">
                 <label for="type" class="col-md-2 control-label">{{:: 'identity-provider.saml.authncontext-decl-ref' | translate}}</label>
