@@ -26,7 +26,6 @@ import javax.xml.namespace.QName;
 
 import org.keycloak.Config.Scope;
 import org.keycloak.broker.provider.AbstractIdentityProviderFactory;
-import org.keycloak.common.util.Time;
 import org.keycloak.dom.saml.v2.assertion.AttributeType;
 import org.keycloak.dom.saml.v2.metadata.EndpointType;
 import org.keycloak.dom.saml.v2.metadata.EntitiesDescriptorType;
@@ -76,7 +75,7 @@ public class SpidIdentityProviderFactory extends AbstractIdentityProviderFactory
             Object parsedObject = SAMLParser.getInstance().parse(inputStream);
             EntityDescriptorType entityType;
 
-            if (EntitiesDescriptorType.class.isInstance(parsedObject)) {
+            if (parsedObject instanceof EntitiesDescriptorType) {
                 entityType = (EntityDescriptorType) ((EntitiesDescriptorType) parsedObject).getEntityDescriptor().get(0);
             } else {
                 entityType = (EntityDescriptorType) parsedObject;

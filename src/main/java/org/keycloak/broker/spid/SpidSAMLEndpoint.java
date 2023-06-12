@@ -588,8 +588,8 @@ public class SpidSAMLEndpoint {
             event.event(EventType.LOGIN);
             CacheControlUtil.noBackButtonCacheControlHeader();
             Optional<ClientModel> oClient = SpidSAMLEndpoint.this.session.clients()
-              .searchClientsByAttributes(realm, Collections.singletonMap(SamlProtocol.SAML_IDP_INITIATED_SSO_URL_NAME, clientUrlName), 0, 1)
-              .findFirst();
+                .searchClientsByAttributes(realm, Collections.singletonMap(SamlProtocol.SAML_IDP_INITIATED_SSO_URL_NAME, clientUrlName), 0, 1)
+                .findFirst();
 
             if (! oClient.isPresent()) {
                 event.error(Errors.CLIENT_NOT_FOUND);
@@ -613,10 +613,10 @@ public class SpidSAMLEndpoint {
 
         private boolean isSuccessfulSamlResponse(ResponseType responseType) {
             return responseType != null
-              && responseType.getStatus() != null
-              && responseType.getStatus().getStatusCode() != null
-              && responseType.getStatus().getStatusCode().getValue() != null
-              && Objects.equals(responseType.getStatus().getStatusCode().getValue().toString(), JBossSAMLURIConstants.STATUS_SUCCESS.get());
+                && responseType.getStatus() != null
+                && responseType.getStatus().getStatusCode() != null
+                && responseType.getStatus().getStatusCode().getValue() != null
+                && Objects.equals(responseType.getStatus().getStatusCode().getValue().toString(), JBossSAMLURIConstants.STATUS_SUCCESS.get());
         }
 
 
@@ -938,13 +938,13 @@ public class SpidSAMLEndpoint {
      * @return spidcode response error string
      */
     private String verifySpidResponse(Element documentElement,
-                                      Element assertionElement,
-                                      String expectedRequestId,
-                                      ResponseType responseType,
-                                      AuthenticationSessionModel authSession)
+                                        Element assertionElement,
+                                        String expectedRequestId,
+                                        ResponseType responseType,
+                                        AuthenticationSessionModel authSession)
     {
             //2: Unsigned Response
-           if (responseType.getSignature() == null) {
+            if (responseType.getSignature() == null) {
                 return "SpidSamlCheck_02";
             }
 
@@ -1008,7 +1008,7 @@ public class SpidSAMLEndpoint {
         }
 
         // 17: Response > InResponseTo missing
-             if (!documentElement.hasAttribute("InResponseTo")) {
+            if (!documentElement.hasAttribute("InResponseTo")) {
             return "SpidSamlCheck_nr17";
         }
 
@@ -1142,13 +1142,13 @@ public class SpidSAMLEndpoint {
         //44 Assertion NameID missing
         Element nameID = getDocumentElement(assertionElement, "NameID");
         if(nameID==null){
-                return "SpidSamlCheck_44";
+            return "SpidSamlCheck_44";
         }
 
         //43 Assertion NameID unspecified
         if(nameID.getFirstChild() != null && StringUtil.isNullOrEmpty(nameID.getFirstChild().getNodeValue().trim())){
-        return "SpidSamlCheck_43";
-       }
+            return "SpidSamlCheck_43";
+        }
 
         //45/46 Format NameID attribute missing or unspecified
         if(StringUtil.isNullOrEmpty(nameID.getAttribute("Format"))){
@@ -1390,11 +1390,12 @@ public class SpidSAMLEndpoint {
         Element authnContextClassRef = getDocumentElement(authnContextElement, "AuthnContextClassRef");
         if(authnContextClassRef!= null &&
                 (authnContextClassRef.getFirstChild() == null ||
-           StringUtil.isNullOrEmpty(authnContextClassRef.getFirstChild().getNodeValue()))){
+            StringUtil.isNullOrEmpty(authnContextClassRef.getFirstChild().getNodeValue()))){
             return  "SpidSamlCheck_92";
 
         }
 
+        //FIXME: CessionarioCommittente
         //93 Assertion > AuthnStatement > AuthnContextClassRef missing note: response snippet same as #90
         if(authnContextClassRef==null){
             return  "SpidSamlCheck_93";
@@ -1414,11 +1415,6 @@ public class SpidSAMLEndpoint {
 
         //98,99,100,103,104,105,106,107,108 caught by kc
         //109 ok
-
-
-
-
-
 
         return null;
     }
