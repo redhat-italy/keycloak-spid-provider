@@ -2,9 +2,12 @@
 <!--
   ~ Copyright 2015 Red Hat, Inc. and/or its affiliates.
   ~
-  ~ Licensed under the Apache License version 2.0, available at http://www.apache.org/licenses/LICENSE-2.0
+  ~ Licensed under the Apache License version 2.0, available at
+http://www.apache.org/licenses/LICENSE-2.0
   -->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.github.redhatitaly</groupId>
     <artifactId>keycloak-spid-provider</artifactId>
@@ -84,9 +87,32 @@
             <version>${junit.version}</version>
             <scope>test</scope>
         </dependency>
-
     </dependencies>
-
+    <!-- Red Hat JBoss Middleware Maven Repository -->
+    <repositories>
+        <repository>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+            <id>redhat</id>
+            <url>https://maven.repository.redhat.com/ga</url>
+        </repository>
+    </repositories>
+    <pluginRepositories>
+        <pluginRepository>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+            <id>redhat</id>
+            <url>https://maven.repository.redhat.com/ga</url>
+        </pluginRepository>
+    </pluginRepositories>
     <build>
         <finalName>spid-provider</finalName>
         <pluginManagement>
@@ -97,7 +123,8 @@
                     <version>2.0.2.Final</version>
                     <configuration>
                         <skip>false</skip>
-                        <!-- ATTENTION!  FOR DEV PURPOSES SET THE APPROPRIATE JBOSS MNGMT PORT ON YOUR HOST!-->
+                        <!-- ATTENTION!  FOR DEV PURPOSES SET THE APPROPRIATE JBOSS MNGMT PORT ON
+                        YOUR HOST!-->
                         <port>9993</port>
                     </configuration>
                 </plugin>
