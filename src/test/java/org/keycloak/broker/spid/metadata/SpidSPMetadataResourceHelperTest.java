@@ -30,9 +30,12 @@ public class SpidSPMetadataResourceHelperTest {
 
     private SpidSPMetadataResourceHelper helper;
     private static SpidIdentityProviderConfig defaultConfig = new SpidIdentityProviderConfig();
+    private static SpidIdentityProviderConfig defaultConfigNomeCognome = new SpidIdentityProviderConfig();
+
 
     @BeforeClass
     public static void initClass() {
+        //If the test will grow we will consider an object mother pattern
         defaultConfig.setBillingIdPaese("IT");
         defaultConfig.setBillingIdCodice("+390123456789");
         defaultConfig.setBillingAnagraficaDenominazione("Azienda_Destinataria_Fatturazione");
@@ -43,6 +46,20 @@ public class SpidSPMetadataResourceHelperTest {
         defaultConfig.setBillingSedeProvincia("XY");
         defaultConfig.setBillingSedeNazione("IT");
         defaultConfig.setBillingTerzoIntermediarioSoggettoEmittente("terzo_intermediario_soggetto_emittente");
+
+        defaultConfigNomeCognome.setBillingIdPaese("IT");
+        defaultConfigNomeCognome.setBillingIdCodice("+390123456789");
+        defaultConfigNomeCognome.setBillingAnagraficaNome("Mario");
+        defaultConfigNomeCognome.setBillingAnagraficaCognome("Rossi");
+        defaultConfigNomeCognome.setBillingAnagraficaTitolo("Dottore");
+        defaultConfigNomeCognome.setBillingSedeIndirizzo("via [...]");
+        defaultConfigNomeCognome.setBillingSedeNumeroCivico("99");
+        defaultConfigNomeCognome.setBillingSedeCap("12345");
+        defaultConfigNomeCognome.setBillingSedeComune("nome_citta");
+        defaultConfigNomeCognome.setBillingSedeProvincia("XY");
+        defaultConfigNomeCognome.setBillingSedeNazione("IT");
+        
+
     }
 
     @Before
@@ -64,6 +81,19 @@ public class SpidSPMetadataResourceHelperTest {
     }
 
     @Test
+    public void testCessionarioCommittenteBillingExtensionNomeCognome()
+            throws ConfigurationException, TransformerException, IOException {
+        final String expected = Files.readString(Paths.get("src/test/resources/cessionarioCommittenteNomeCognome.xml"));
+
+        ContactType contactType = new ContactType(ContactTypeType.BILLING);
+
+        helper.addCessionarioCommittente(contactType, defaultConfigNomeCognome);
+
+        String actual = toString(contactType.getExtensions().getDomElements().get(0));
+        assertEquals(expected, actual);
+    }
+
+    @Test
     public void testTerzoIntermediarioSoggettoEmittenteBillingExtension()
             throws ConfigurationException, TransformerException, IOException {
         final String expected = "<fpa:TerzoIntermediarioSoggettoEmittente xmlns:fpa=\"http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2\">terzo_intermediario_soggetto_emittente</fpa:TerzoIntermediarioSoggettoEmittente>\n";
@@ -73,7 +103,6 @@ public class SpidSPMetadataResourceHelperTest {
         helper.addTerzoIntermediarioSoggettoEmittente(contactType, defaultConfig);
 
         String actual = toString(contactType.getExtensions().getDomElements().get(0));
-        System.out.println(actual);
         assertEquals(expected, actual);
     }
 

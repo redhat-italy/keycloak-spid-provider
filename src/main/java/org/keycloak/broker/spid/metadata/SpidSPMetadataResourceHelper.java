@@ -79,199 +79,98 @@ public class SpidSPMetadataResourceHelper {
         }
 
         Document document = DocumentUtil.createDocument();
+        /*
+         * Main section logic as stated in Page 5 of the document below:
+         */
+        // https://www.agid.gov.it/sites/default/files/repository_files/spid-avviso-n29v3-specifiche_sp_pubblici_e_privati_0.pdf
+
         // Create the root CessionarioCommittente element
-        Element cessionarioCommittenteExtension = document.createElementNS(FPA_METADATA_EXTENSIONS_NS,
-                "fpa:CessionarioCommittente");
-        cessionarioCommittenteExtension.setAttributeNS(XMLNS_NS, FPA_QUALIFIED_NAME, FPA_METADATA_EXTENSIONS_NS);
-
-        Element datiAnagrafici = document.createElementNS(FPA_METADATA_EXTENSIONS_NS, "fpa:DatiAnagrafici");
-        datiAnagrafici.setAttributeNS(XMLNS_NS, FPA_QUALIFIED_NAME, FPA_METADATA_EXTENSIONS_NS);
-
+        Element cessionarioCommittenteExtension = createFPAElement("fpa:CessionarioCommittente", document);
+        // Create the DatiAnagrafici element
+        Element datiAnagrafici = createFPAElement("fpa:DatiAnagrafici", document);
+        cessionarioCommittenteExtension.appendChild(datiAnagrafici);
         // Create the IdFiscaleIVA element
-        Element idFiscaleIVA = document.createElementNS(FPA_METADATA_EXTENSIONS_NS, "fpa:IdFiscaleIVA");
-        idFiscaleIVA.setAttributeNS(XMLNS_NS, FPA_QUALIFIED_NAME, FPA_METADATA_EXTENSIONS_NS);
-
-        // Create the CodiceFiscale element
-        Element codiceFiscale = document.createElementNS(FPA_METADATA_EXTENSIONS_NS, "fpa:CodiceFiscale");
-        codiceFiscale.setAttributeNS(XMLNS_NS, FPA_QUALIFIED_NAME, FPA_METADATA_EXTENSIONS_NS);
-
-        boolean addIdFiscaleIVA = isNotBlank(config.getBillingIdPaese())
-                || isNotBlank(config.getBillingIdCodice());
-        boolean addCodiceFiscale = isNotBlank(config.getBillingCodiceFiscale());
-
+        Element idFiscaleIVA = createFPAElement("fpa:IdFiscaleIVA", document);
+        datiAnagrafici.appendChild(idFiscaleIVA);
         // Create the IdPaese element and set its text content
-        if (isNotBlank(config.getBillingIdPaese())) {
-            Element idPaese = document.createElementNS(FPA_METADATA_EXTENSIONS_NS, "fpa:IdPaese");
-            idPaese.setAttributeNS(XMLNS_NS, FPA_QUALIFIED_NAME, FPA_METADATA_EXTENSIONS_NS);
-            idPaese.setTextContent(config.getBillingIdPaese());
-            idFiscaleIVA.appendChild(idPaese);
-        }
-
+        Element idPaese = createFPAElement("fpa:IdPaese", document, config.getBillingIdPaese());
         // Create the IdCodice element and set its text content
-        if (isNotBlank(config.getBillingIdCodice())) {
-            Element idCodice = document.createElementNS(FPA_METADATA_EXTENSIONS_NS, "fpa:IdCodice");
-            idCodice.setAttributeNS(XMLNS_NS, FPA_QUALIFIED_NAME, FPA_METADATA_EXTENSIONS_NS);
-            idCodice.setTextContent(config.getBillingIdCodice());
-            idFiscaleIVA.appendChild(idCodice);
-        }
-
-        // Create the CodiceFiscale element and set its text content
+        Element idCodice = createFPAElement("fpa:IdCodice", document, config.getBillingIdCodice());
+        idFiscaleIVA.appendChild(idPaese);
+        idFiscaleIVA.appendChild(idCodice);
         if (isNotBlank(config.getBillingCodiceFiscale())) {
+            // Create the CodiceFiscale element
+            Element codiceFiscale = createFPAElement("fpa:CodiceFiscale", document);
             codiceFiscale.setTextContent(config.getBillingCodiceFiscale());
-
-        }
-
-        // Dati Anagrafici Logic (as stated in Page 5 of
-        // https://www.agid.gov.it/sites/default/files/repository_files/spid-avviso-n29v3-specifiche_sp_pubblici_e_privati_0.pdf)
-
-        if (addIdFiscaleIVA) {
-            datiAnagrafici.appendChild(idFiscaleIVA);
-        }
-
-        if (addCodiceFiscale) {
             datiAnagrafici.appendChild(codiceFiscale);
         }
 
         // Create the Anagrafica element
-        Element anagrafica = document.createElementNS(FPA_METADATA_EXTENSIONS_NS,
-                "fpa:Anagrafica");
-        anagrafica.setAttributeNS(XMLNS_NS, FPA_QUALIFIED_NAME, FPA_METADATA_EXTENSIONS_NS);
+        Element anagrafica = createFPAElement("fpa:Anagrafica", document);
         datiAnagrafici.appendChild(anagrafica);
 
-        boolean addDenominazione = isNotBlank(config.getBillingAnagraficaDenominazione());
-        boolean addNomeCognome = isNotBlank(config.getBillingAnagraficaNome())
-                && isNotBlank(config.getBillingAnagraficaCognome());
-        boolean addTitolo = isNotBlank(config.getBillingAnagraficaTitolo());
-        boolean addCodiceEORI = isNotBlank(config.getBillingAnagraficaCodiceEORI());
-
-        // Create the Denominazione element and set its text content
-        Element denominazione = document.createElementNS(FPA_METADATA_EXTENSIONS_NS,
-                "fpa:Denominazione");
-        denominazione.setAttributeNS(XMLNS_NS, FPA_QUALIFIED_NAME, FPA_METADATA_EXTENSIONS_NS);
-
-        // Create the Nome element and set its text content
-        Element nome = document.createElementNS(FPA_METADATA_EXTENSIONS_NS,
-                "fpa:Nome");
-        nome.setAttributeNS(XMLNS_NS, FPA_QUALIFIED_NAME, FPA_METADATA_EXTENSIONS_NS);
-
-        // Create the Cognome element and set its text content
-        Element cognome = document.createElementNS(FPA_METADATA_EXTENSIONS_NS,
-                "fpa:Cognome");
-        cognome.setAttributeNS(XMLNS_NS, FPA_QUALIFIED_NAME, FPA_METADATA_EXTENSIONS_NS);
-
-        // Create the Titolo element and set its text content
-        Element titolo = document.createElementNS(FPA_METADATA_EXTENSIONS_NS,
-                "fpa:Titolo");
-        titolo.setAttributeNS(XMLNS_NS, FPA_QUALIFIED_NAME, FPA_METADATA_EXTENSIONS_NS);
-
-        // Create the CodiceEORI element and set its text content
-        Element codiceEORI = document.createElementNS(FPA_METADATA_EXTENSIONS_NS,
-                "fpa:CodiceEORI");
-        codiceEORI.setAttributeNS(XMLNS_NS, FPA_QUALIFIED_NAME, FPA_METADATA_EXTENSIONS_NS);
-
+        /*
+         * The logic says that you MUST have one between "Denominazione" element
+         * or both "Nome" and "Cognome". This logic here is not explicitly enforced.
+         */
         if (isNotBlank(config.getBillingAnagraficaDenominazione())) {
+            // Create the Denominazione element and set its text content
+            Element denominazione = createFPAElement("fpa:Denominazione", document);
             denominazione.setTextContent(config.getBillingAnagraficaDenominazione());
-        }
-
-        if (isNotBlank(config.getBillingAnagraficaNome())) {
-            nome.setTextContent(config.getBillingAnagraficaNome());
-        }
-
-        if (isNotBlank(config.getBillingAnagraficaCognome())) {
-            cognome.setTextContent(config.getBillingAnagraficaNome());
-        }
-
-        if (isNotBlank(config.getBillingAnagraficaTitolo())) {
-            titolo.setTextContent(config.getBillingAnagraficaTitolo());
-        }
-
-        if (isNotBlank(config.getBillingAnagraficaCodiceEORI())) {
-            codiceEORI.setTextContent(config.getBillingAnagraficaCodiceEORI());
-        }
-
-        if (addDenominazione) {
             anagrafica.appendChild(denominazione);
         }
-
-        if (addNomeCognome) {
+        if (isNotBlank(config.getBillingAnagraficaNome())) {
+            // Create the Nome element and set its text content
+            Element nome = createFPAElement("fpa:Nome", document);
+            nome.setTextContent(config.getBillingAnagraficaNome());
             anagrafica.appendChild(nome);
+        }
+        if (isNotBlank(config.getBillingAnagraficaCognome())) {
+            // Create the Cognome element and set its text content
+            Element cognome = createFPAElement("fpa:Cognome", document);
+            cognome.setTextContent(config.getBillingAnagraficaCognome());
             anagrafica.appendChild(cognome);
-            if (addTitolo) {
-                anagrafica.appendChild(titolo);
-            }
-            if (addCodiceEORI) {
-                anagrafica.appendChild(codiceEORI);
-            }
         }
-
-        cessionarioCommittenteExtension.appendChild(datiAnagrafici);
-
-        // END datiAnagrafici
-
+        if (isNotBlank(config.getBillingAnagraficaTitolo())) {
+            // Create the Titolo element and set its text content
+            Element titolo = createFPAElement("fpa:Titolo", document);
+            titolo.setTextContent(config.getBillingAnagraficaTitolo());
+            anagrafica.appendChild(titolo);
+        }
+        if (isNotBlank(config.getBillingAnagraficaCodiceEORI())) {
+            // Create the CodiceEORI element and set its text content
+            Element codiceEORI = createFPAElement("fpa:CodiceEORI", document);
+            codiceEORI.setTextContent(config.getBillingAnagraficaCodiceEORI());
+            anagrafica.appendChild(codiceEORI);
+        }
         // Create the Sede element
-        Element sede = document.createElementNS(FPA_METADATA_EXTENSIONS_NS,
-                "fpa:Sede");
-        sede.setAttributeNS(XMLNS_NS, FPA_QUALIFIED_NAME, FPA_METADATA_EXTENSIONS_NS);
+        Element sede = createFPAElement("fpa:Sede", document);
         cessionarioCommittenteExtension.appendChild(sede);
-
         // Create the Indirizzo element and set its text content
-        Element indirizzo = document.createElementNS(FPA_METADATA_EXTENSIONS_NS,
-                "fpa:Indirizzo");
-        indirizzo.setAttributeNS(XMLNS_NS, FPA_QUALIFIED_NAME, FPA_METADATA_EXTENSIONS_NS);
-
-        if (isNotBlank(config.getBillingSedeIndirizzo())) {
-            indirizzo.setTextContent(config.getBillingSedeIndirizzo());
-            sede.appendChild(indirizzo);
-        }
-
-        // Create the NumeroCivico element and set its text content
-        Element numeroCivico = document.createElementNS(FPA_METADATA_EXTENSIONS_NS,
-                "fpa:NumeroCivico");
-        numeroCivico.setAttributeNS(XMLNS_NS, FPA_QUALIFIED_NAME, FPA_METADATA_EXTENSIONS_NS);
+        Element indirizzo = createFPAElement("fpa:Indirizzo", document, config.getBillingSedeIndirizzo());
+        sede.appendChild(indirizzo);
 
         if (isNotBlank(config.getBillingSedeNumeroCivico())) {
+            // Create the NumeroCivico element and set its text content
+            Element numeroCivico = createFPAElement("fpa:NumeroCivico", document);
             numeroCivico.setTextContent(config.getBillingSedeNumeroCivico());
             sede.appendChild(numeroCivico);
         }
-
         // Create the CAP element and set its text content
-        Element cap = document.createElementNS(FPA_METADATA_EXTENSIONS_NS,
-                "fpa:CAP");
-        cap.setAttributeNS(XMLNS_NS, FPA_QUALIFIED_NAME, FPA_METADATA_EXTENSIONS_NS);
-
-        if (isNotBlank(config.getBillingSedeCap())) {
-            cap.setTextContent(config.getBillingSedeCap());
-            sede.appendChild(cap);
-        }
-
+        Element cap = createFPAElement("fpa:CAP", document, config.getBillingSedeCap());
         // Create the Comune element and set its text content
-        Element comune = document.createElementNS(FPA_METADATA_EXTENSIONS_NS,
-                "fpa:Comune");
-        comune.setAttributeNS(XMLNS_NS, FPA_QUALIFIED_NAME, FPA_METADATA_EXTENSIONS_NS);
-
-        if (isNotBlank(config.getBillingSedeComune())) {
-            comune.setTextContent(config.getBillingSedeComune());
-            sede.appendChild(comune);
-        }
-
-        // Create the Provincia element and set its text content
-        Element provincia = document.createElementNS(FPA_METADATA_EXTENSIONS_NS,
-                "fpa:Provincia");
-        provincia.setAttributeNS(XMLNS_NS, FPA_QUALIFIED_NAME, FPA_METADATA_EXTENSIONS_NS);
+        Element comune = createFPAElement("fpa:Comune", document, config.getBillingSedeComune());
+        sede.appendChild(cap);
+        sede.appendChild(comune);
         if (isNotBlank(config.getBillingSedeProvincia())) {
-            provincia.setTextContent(config.getBillingSedeProvincia());
+            // Create the Provincia element and set its text content
+            Element provincia = createFPAElement("fpa:Provincia", document, config.getBillingSedeProvincia());
             sede.appendChild(provincia);
         }
-
         // Create the Nazione element and set its text content
-        Element nazione = document.createElementNS(FPA_METADATA_EXTENSIONS_NS,
-                "fpa:Nazione");
-        nazione.setAttributeNS(XMLNS_NS, FPA_QUALIFIED_NAME, FPA_METADATA_EXTENSIONS_NS);
+        Element nazione = createFPAElement("fpa:Nazione", document, config.getBillingSedeNazione());
+        sede.appendChild(nazione);
 
-        if (isNotBlank(config.getBillingSedeNazione())) {
-            nazione.setTextContent(config.getBillingSedeNazione());
-            sede.appendChild(nazione);
-        }
         billingContactPerson.getExtensions().addExtension(cessionarioCommittenteExtension);
 
     }
@@ -311,14 +210,14 @@ public class SpidSPMetadataResourceHelper {
         Document document = DocumentUtil.createDocument();
 
         // Create the TerzoIntermediarioSoggettoEmittente and set its text content
-        Element terzoIntermediarioSoggettoEmittente = document.createElementNS(FPA_METADATA_EXTENSIONS_NS,
-                "fpa:TerzoIntermediarioSoggettoEmittente");
-
-        terzoIntermediarioSoggettoEmittente.setAttributeNS(XMLNS_NS, FPA_QUALIFIED_NAME, FPA_METADATA_EXTENSIONS_NS);
-        terzoIntermediarioSoggettoEmittente.setTextContent(billingTerzoIntermediarioSoggettoEmittente);
+        Element terzoIntermediarioSoggettoEmittente =  createFPAElement("fpa:TerzoIntermediarioSoggettoEmittente", document, billingTerzoIntermediarioSoggettoEmittente);
 
         billingContactPerson.getExtensions().addExtension(terzoIntermediarioSoggettoEmittente);
     }
+
+    /*
+     *  Some macro
+     */
 
     private static boolean isNotBlank(String string) {
         return !isBlank(string);
@@ -326,5 +225,18 @@ public class SpidSPMetadataResourceHelper {
 
     private static boolean isBlank(String string) {
         return string == null || string.trim().isEmpty();
+    }
+
+    private Element createFPAElement(String qualifiedName, Document document) {
+        Element element = document.createElementNS(FPA_METADATA_EXTENSIONS_NS,
+                qualifiedName);
+        element.setAttributeNS(XMLNS_NS, FPA_QUALIFIED_NAME, FPA_METADATA_EXTENSIONS_NS);
+        return element;
+    }
+
+    private Element createFPAElement(String qualifiedName, Document document, String value) {
+        Element element = createFPAElement(qualifiedName, document);
+        element.setTextContent(value);
+        return element;
     }
 }
