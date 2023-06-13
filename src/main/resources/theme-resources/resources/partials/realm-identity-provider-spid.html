@@ -138,7 +138,7 @@
                     </div>
                     <div>
                         <a class="form-control" ng-href="{{authUrl}}/realms/{{realm.realm}}/spid-sp-metadata" target="_blank"
-                           title="{{:: 'identity-provider.spid.protocol-endpoints.saml.tooltip' | translate}}">{{:: 'identity-provider.spid.protocol-endpoints.saml' | translate}}</a>
+                            title="{{:: 'identity-provider.spid.protocol-endpoints.saml.tooltip' | translate}}">{{:: 'identity-provider.spid.protocol-endpoints.saml' | translate}}</a>
                     </div>
                 </div>
                 <kc-tooltip>{{:: 'identity-provider.saml.protocol-endpoints.saml.tooltip' | translate}}</kc-tooltip>
@@ -180,7 +180,7 @@
                 <div class="col-md-6">
                     <select id="nameIDPolicyFormat" ng-model="identityProvider.config.nameIDPolicyFormat"
                             ng-options="nameFormat.format as nameFormat.name for nameFormat in nameIdFormats">
-                     </select>
+                    </select>
                     <!-- <input class="form-control" id="nameIDPolicyFormat" type="text" ng-model="identityProvider.config.nameIDPolicyFormat"> -->
                 </div>
                 <kc-tooltip>{{:: 'nameid-policy-format.tooltip' | translate}}</kc-tooltip>
@@ -190,7 +190,7 @@
                 <div class="col-md-6">
                     <select id="principalType" ng-model="identityProvider.config.principalType"
                             ng-options="pType.type as pType.name for pType in principalTypes">
-                     </select>
+                    </select>
                 </div>
                 <kc-tooltip>{{:: 'saml.principal-type.tooltip' | translate}}</kc-tooltip>
             </div>
@@ -201,7 +201,7 @@
                 </div>
                 <kc-tooltip>{{:: 'saml.principal-attribute.tooltip' | translate}}</kc-tooltip>
             </div>
-             <div class="form-group">
+            <div class="form-group">
                 <label class="col-md-2 control-label" for="allowCreate">{{:: 'saml.allow-create' | translate}}</label>
                 <div class="col-md-6">
                     <input ng-model="identityProvider.config.allowCreate" id="allowCreate" onoffswitchvalue on-text="{{:: 'onText' | translate}}" off-text="{{:: 'offText' | translate}}" />
@@ -421,6 +421,208 @@
                 </div>
                 <kc-tooltip>{{:: 'identity-provider.spid.contactEmail.billing.tooltip' | translate}}</kc-tooltip>
             </div>
+            <!-- Init Cessionario Committente -->
+            <fieldset data-ng-show="identityProvider.config.otherContactIsSpPrivate == 'true'">
+                <legend uncollapsed><span class="text">{{:: 'identity-provider.spid.cessionarioCommittente' | translate}}</span>
+                    <kc-tooltip>{{:: 'identity-provider.spid.cessionarioCommittente.tooltip' | translate}}</kc-tooltip>
+                </legend>
+                <fieldset>
+                    <legend uncollapsed><span class="text">{{:: 'identity-provider.spid.cessionarioCommittente.datiAnagrafici' |
+                            translate}}</span>
+                        <kc-tooltip>{{::'identity-provider.spid.cessionarioCommittente.datiAnagrafici.tooltip' |
+                            translate}}</kc-tooltip>
+                    </legend>
+                    <fieldset>
+                        <legend uncollapsed><span class="text">{{::
+                                'identity-provider.spid.cessionarioCommittente.datiAnagrafici.idFiscaleIva' | translate}}</span>
+                            <kc-tooltip>{{::'identity-provider.spid.cessionarioCommittente.datiAnagrafici.idFiscaleIva.tooltip' |
+                                translate}}</kc-tooltip>
+                        </legend>
+                        <div class="form-group">
+                            <label class="col-md-2 control-label" for="billingIdPaese">{{::
+                                'identity-provider.spid.cessionarioCommittente.idPaese.billing' | translate}}</label>
+                            <div class="col-md-6">
+                                <input class="form-control" id="billingIdPaese" type="text"
+                                    ng-model="identityProvider.config.billingIdPaese" />
+                            </div>
+                            <kc-tooltip>{{:: 'identity-provider.spid.cessionarioCommittente.idPaese.billing.tooltip' |
+                                translate}}</kc-tooltip>
+                        </div>
+            
+                        <div class="form-group">
+                            <label class="col-md-2 control-label" for="billingIdCodice">{{::
+                                'identity-provider.spid.cessionarioCommittente.idCodice.billing' | translate}}</label>
+                            <div class="col-md-6">
+                                <input class="form-control" id="billingIdCodice" type="text"
+                                    ng-model="identityProvider.config.billingIdCodice" />
+                            </div>
+                            <kc-tooltip>{{:: 'identity-provider.spid.cessionarioCommittente.idCodice.billing.tooltip' |
+                                translate}}</kc-tooltip>
+                        </div>
+                    </fieldset>
+                    <div class="form-group">
+                        <label class="col-md-2 control-label" for="billingCodiceFiscale">{{::
+                            'identity-provider.spid.cessionarioCommittente.codiceFiscale.billing' | translate}}</label>
+                        <div class="col-md-6">
+                            <input class="form-control" id="billingCodiceFiscale" type="text"
+                                ng-model="identityProvider.config.billingCodiceFiscale" />
+                        </div>
+                        <kc-tooltip>{{:: 'identity-provider.spid.cessionarioCommittente.codiceFiscale.billing.tooltip' |
+                            translate}}</kc-tooltip>
+                    </div>
+                    <fieldset>
+                        <legend uncollapsed><span class="text">{{:: 'identity-provider.spid.cessionarioCommittente.anagrafica' |
+                                translate}}</span>
+                            <kc-tooltip>{{::'identity-provider.spid.cessionarioCommittente.anagrafica.tooltip' |
+                                translate}}</kc-tooltip>
+                        </legend>
+                        <div class="form-group">
+                            <label class="col-md-2 control-label" for="billingAnagraficaDenominazione">{{::
+                                'identity-provider.spid.cessionarioCommittente.anagraficaDenominazione.billing' |
+                                translate}}</label>
+                            <div class="col-md-6">
+                                <input class="form-control" id="billingAnagraficaDenominazione" type="text"
+                                    ng-model="identityProvider.config.billingAnagraficaDenominazione" />
+                            </div>
+                            <kc-tooltip>{{:: 'identity-provider.spid.cessionarioCommittente.anagraficaDenominazione.billing.tooltip'
+                                |
+                                translate}}</kc-tooltip>
+                        </div>
+            
+                        <div class="form-group">
+                            <label class="col-md-2 control-label" for="billingAnagraficaNome">{{::
+                                'identity-provider.spid.cessionarioCommittente.anagraficaNome.billing' | translate}}</label>
+                            <div class="col-md-6">
+                                <input class="form-control" id="billingAnagraficaNome" type="text"
+                                    ng-model="identityProvider.config.billingAnagraficaNome" />
+                            </div>
+                            <kc-tooltip>{{:: 'identity-provider.spid.cessionarioCommittente.anagraficaNome.billing.tooltip' |
+                                translate}}</kc-tooltip>
+                        </div>
+            
+                        <div class="form-group">
+                            <label class="col-md-2 control-label" for="billingAnagraficaCognome">{{::
+                                'identity-provider.spid.cessionarioCommittente.anagraficaCognome.billing' | translate}}</label>
+                            <div class="col-md-6">
+                                <input class="form-control" id="billingAnagraficaCognome" type="text"
+                                    ng-model="identityProvider.config.billingAnagraficaCognome" />
+                            </div>
+                            <kc-tooltip>{{:: 'identity-provider.spid.cessionarioCommittente.anagraficaCognome.billing.tooltip' |
+                                translate}}</kc-tooltip>
+                        </div>
+            
+                        <div class="form-group">
+                            <label class="col-md-2 control-label" for="billingAnagraficaTitolo">{{::
+                                'identity-provider.spid.cessionarioCommittente.anagraficaTitolo.billing' | translate}}</label>
+                            <div class="col-md-6">
+                                <input class="form-control" id="billingAnagraficaTitolo" type="text"
+                                    ng-model="identityProvider.config.billingAnagraficaTitolo" />
+                            </div>
+                            <kc-tooltip>{{:: 'identity-provider.spid.cessionarioCommittente.anagraficaTitolo.billing.tooltip' |
+                                translate}}</kc-tooltip>
+                        </div>
+            
+                        <div class="form-group">
+                            <label class="col-md-2 control-label" for="billingAnagraficaCodiceEORI">{{::
+                                'identity-provider.spid.cessionarioCommittente.anagraficaCodiceEORI.billing' | translate}}</label>
+                            <div class="col-md-6">
+                                <input class="form-control" id="billingAnagraficaCodiceEORI" type="text"
+                                    ng-model="identityProvider.config.billingAnagraficaCodiceEORI" />
+                            </div>
+                            <kc-tooltip>{{:: 'identity-provider.spid.cessionarioCommittente.anagraficaCodiceEORI.billing.tooltip' |
+                                translate}}</kc-tooltip>
+                        </div>
+                    </fieldset>
+                </fieldset>
+                <fieldset>
+                    <legend uncollapsed><span class="text">{{:: 'identity-provider.spid.cessionarioCommittente.sede' |
+                            translate}}</span>
+                        <kc-tooltip>{{::'identity-provider.spid.cessionarioCommittente.sede.tooltip' | translate}}</kc-tooltip>
+                    </legend>
+                    <div class="form-group">
+                        <label class="col-md-2 control-label" for="billingSedeIndirizzo">{{::
+                            'identity-provider.spid.cessionarioCommittente.sedeIndirizzo.billing' | translate}}</label>
+                        <div class="col-md-6">
+                            <input class="form-control" id="billingSedeIndirizzo" type="text"
+                                ng-model="identityProvider.config.billingSedeIndirizzo" />
+                        </div>
+                        <kc-tooltip>{{:: 'identity-provider.spid.cessionarioCommittente.sedeIndirizzo.billing.tooltip' |
+                            translate}}</kc-tooltip>
+                    </div>
+            
+                    <div class="form-group">
+                        <label class="col-md-2 control-label" for="billingSedeNumeroCivico">{{::
+                            'identity-provider.spid.cessionarioCommittente.sedeNumeroCivico.billing' | translate}}</label>
+                        <div class="col-md-6">
+                            <input class="form-control" id="billingSedeNumeroCivico" type="text"
+                                ng-model="identityProvider.config.billingSedeNumeroCivico" />
+                        </div>
+                        <kc-tooltip>{{:: 'identity-provider.spid.cessionarioCommittente.sedeNumeroCivico.billing.tooltip' |
+                            translate}}</kc-tooltip>
+                    </div>
+            
+                    <div class="form-group">
+                        <label class="col-md-2 control-label" for="billingSedeCap">{{::
+                            'identity-provider.spid.cessionarioCommittente.sedeCap.billing' | translate}}</label>
+                        <div class="col-md-6">
+                            <input class="form-control" id="billingSedeCap" type="text"
+                                ng-model="identityProvider.config.billingSedeCap" />
+                        </div>
+                        <kc-tooltip>{{:: 'identity-provider.spid.cessionarioCommittente.sedeCap.billing.tooltip' |
+                            translate}}</kc-tooltip>
+                    </div>
+            
+                    <div class="form-group">
+                        <label class="col-md-2 control-label" for="billingSedeComune">{{::
+                            'identity-provider.spid.cessionarioCommittente.sedeComune.billing' | translate}}</label>
+                        <div class="col-md-6">
+                            <input class="form-control" id="billingSedeComune" type="text"
+                                ng-model="identityProvider.config.billingSedeComune" />
+                        </div>
+                        <kc-tooltip>{{:: 'identity-provider.spid.cessionarioCommittente.sedeComune.billing.tooltip' |
+                            translate}}</kc-tooltip>
+                    </div>
+            
+                    <div class="form-group">
+                        <label class="col-md-2 control-label" for="billingSedeProvincia">{{::
+                            'identity-provider.spid.cessionarioCommittente.sedeProvincia.billing' | translate}}</label>
+                        <div class="col-md-6">
+                            <input class="form-control" id="billingSedeProvincia" type="text"
+                                ng-model="identityProvider.config.billingSedeProvincia" />
+                        </div>
+                        <kc-tooltip>{{:: 'identity-provider.spid.cessionarioCommittente.sedeProvincia.billing.tooltip' |
+                            translate}}</kc-tooltip>
+                    </div>
+            
+                    <div class="form-group">
+                        <label class="col-md-2 control-label" for="billingSedeNazione">{{::
+                            'identity-provider.spid.cessionarioCommittente.sedeNazione.billing' | translate}}</label>
+                        <div class="col-md-6">
+                            <input class="form-control" id="billingSedeNazione" type="text"
+                                ng-model="identityProvider.config.billingSedeNazione" />
+                        </div>
+                        <kc-tooltip>{{:: 'identity-provider.spid.cessionarioCommittente.sedeNazione.billing.tooltip' |
+                            translate}}</kc-tooltip>
+                    </div>
+                </fieldset>
+                <!-- End Cessionario Committente -->
+                <fieldset>
+                    <legend uncollapsed><span class="text">{{:: 'identity-provider.spid.terzoIntermediario.soggettoEmittente' |
+                            translate}}</span> <kc-tooltip>{{::
+                            'identity-provider.spid.terzoIntermediario.soggettoEmittente.tooltip' | translate}}</kc-tooltip>
+                    </legend>
+                    <div class="form-group">
+                        <label class="col-md-2 control-label" for="billingTerzoIntermediarioSoggettoEmittente">{{::
+                            'identity-provider.spid.terzoIntermediario.soggettoEmittente.billing' | translate}}</label>
+                        <div class="col-md-6">
+                            <input class="form-control" id="billingTerzoIntermediarioSoggettoEmittente" type="text"
+                                ng-model="identityProvider.config.billingTerzoIntermediarioSoggettoEmittente" />
+                        </div>
+                        <kc-tooltip>{{:: 'identity-provider.spid.terzoIntermediario.soggettoEmittente.billing.tooltip' |
+                            translate}}</kc-tooltip>
+                    </div>
+                </fieldset>
+            </fieldset>
         </fieldset>
         <fieldset>
             <legend collapsed><span class="text">{{:: 'identity-provider.saml.requested-authncontext' | translate}}</span> <kc-tooltip>{{:: 'identity-provider.saml.requested-authncontext.tooltip' | translate}}</kc-tooltip></legend>

@@ -260,7 +260,7 @@ public class SpidIdentityProvider extends AbstractIdentityProvider<SpidIdentityP
         SubjectType.STSubType subType = subject.getSubType();
         if (subType != null) {
             NameIDType subjectNameID = (NameIDType) subType.getBaseID();
-        	authSession.setUserSessionNote(SpidSAMLEndpoint.SAML_FEDERATED_SUBJECT_NAMEID, subjectNameID.serializeAsString());
+            authSession.setUserSessionNote(SpidSAMLEndpoint.SAML_FEDERATED_SUBJECT_NAMEID, subjectNameID.serializeAsString());
         }
         AuthnStatementType authn =  (AuthnStatementType)context.getContextData().get(SpidSAMLEndpoint.SAML_AUTHN_STATEMENT);
         if (authn != null && authn.getSessionIndex() != null) {
@@ -305,7 +305,7 @@ public class SpidIdentityProvider extends AbstractIdentityProvider<SpidIdentityP
         if (getConfig().isBackchannelSupported()) {
             backchannelLogout(session, userSession, uriInfo, realm);
             return null;
-       } else {
+        } else {
             try {
                 LogoutRequestType logoutRequest = buildLogoutRequest(userSession, uriInfo, realm, singleLogoutServiceUrl);
                 if (logoutRequest.getDestination() != null) {

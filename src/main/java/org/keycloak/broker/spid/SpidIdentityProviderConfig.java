@@ -21,7 +21,6 @@ import static org.keycloak.common.util.UriUtils.checkUrl;
 import org.keycloak.common.enums.SslRequired;
 import org.keycloak.dom.saml.v2.protocol.AuthnContextComparisonType;
 import org.keycloak.models.IdentityProviderModel;
-import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
 import org.keycloak.protocol.saml.SamlPrincipalType;
 import org.keycloak.saml.common.constants.JBossSAMLURIConstants;
@@ -52,7 +51,7 @@ public class SpidIdentityProviderConfig extends IdentityProviderModel {
     public static final String WANT_ASSERTIONS_SIGNED = "wantAssertionsSigned";
     public static final String WANT_AUTHN_REQUESTS_SIGNED = "wantAuthnRequestsSigned";
     public static final String XML_SIG_KEY_INFO_KEY_NAME_TRANSFORMER = "xmlSigKeyInfoKeyNameTransformer";
-    public static final String ENABLED_FROM_METADATA  = "enabledFromMetadata";
+    public static final String ENABLED_FROM_METADATA = "enabledFromMetadata";
     public static final String AUTHN_CONTEXT_COMPARISON_TYPE = "authnContextComparisonType";
     public static final String AUTHN_CONTEXT_CLASS_REFS = "authnContextClassRefs";
     public static final String AUTHN_CONTEXT_DECL_REFS = "authnContextDeclRefs";
@@ -73,8 +72,24 @@ public class SpidIdentityProviderConfig extends IdentityProviderModel {
     public static final String BILLING_CONTACT_COMPANY = "billingContactCompany";
     public static final String BILLING_CONTACT_PHONE = "billingContactPhone";
     public static final String BILLING_CONTACT_EMAIL = "billingContactEmail";
+    // Cessionario Committente Extension 
+    public static final String BILLING_ID_PAESE = "billingIdPaese";
+    public static final String BILLING_ID_CODICE = "billingIdCodice";
+    public static final String BILLING_CODICE_FISCALE = "billingCodiceFiscale";
+    public static final String BILLING_ANAGRAFICA_DENOMINAZIONE = "billingAnagraficaDenominazione";
+    public static final String BILLING_ANAGRAFICA_NOME = "billingAnagraficaNome";
+    public static final String BILLING_ANAGRAFICA_COGNOME = "billingAnagraficaCognome";
+    public static final String BILLING_ANAGRAFICA_TITOLO = "billingAnagraficaTitolo";
+    public static final String BILLING_ANAGRAFICA_CODICE_EORI = "billingAnagraficaCodiceEORI";
+    public static final String BILLING_SEDE_INDIRIZZO = "billingSedeIndirizzo";
+    public static final String BILLING_SEDE_NUMERO_CIVICO = "billingSedeNumeroCivico";
+    public static final String BILLING_SEDE_CAP = "billingSedeCap";
+    public static final String BILLING_SEDE_COMUNE = "billingSedeComune";
+    public static final String BILLING_SEDE_PROVINCIA = "billingSedeProvincia";
+    public static final String BILLING_SEDE_NAZIONE = "billingSedeNazione";
+    public static final String BILLING_TERZO_INTERMEDIARIO_SOGGETTO_EMITTENTE = "billingTerzoIntermediarioSoggettoEmittente";
 
-    public SpidIdentityProviderConfig(){
+    public SpidIdentityProviderConfig() {
     }
 
     public SpidIdentityProviderConfig(IdentityProviderModel identityProviderModel) {
@@ -89,7 +104,7 @@ public class SpidIdentityProviderConfig extends IdentityProviderModel {
         getConfig().put(ENTITY_ID, entityId);
     }
 
-    public String getIdpEntityId(){
+    public String getIdpEntityId() {
         return getConfig().get(IDP_ENTITY_ID);
     }
 
@@ -133,6 +148,7 @@ public class SpidIdentityProviderConfig extends IdentityProviderModel {
      * @deprecated Prefer {@link #getSigningCertificates()}}
      * @param signingCertificate
      */
+    @Deprecated
     public String getSigningCertificate() {
         return getConfig().get(SIGNING_CERTIFICATE_KEY);
     }
@@ -141,6 +157,7 @@ public class SpidIdentityProviderConfig extends IdentityProviderModel {
      * @deprecated Prefer {@link #addSigningCertificate(String)}}
      * @param signingCertificate
      */
+    @Deprecated
     public void setSigningCertificate(String signingCertificate) {
         getConfig().put(SIGNING_CERTIFICATE_KEY, signingCertificate);
     }
@@ -151,7 +168,8 @@ public class SpidIdentityProviderConfig extends IdentityProviderModel {
             getConfig().put(SIGNING_CERTIFICATE_KEY, signingCertificate);
         } else {
             // Note that "," is not coding character per PEM format specification:
-            // see https://tools.ietf.org/html/rfc1421, section 4.3.2.4 Step 4: Printable Encoding
+            // see https://tools.ietf.org/html/rfc1421, section 4.3.2.4 Step 4: Printable
+            // Encoding
             getConfig().put(SIGNING_CERTIFICATE_KEY, crt + "," + signingCertificate);
         }
     }
@@ -159,10 +177,11 @@ public class SpidIdentityProviderConfig extends IdentityProviderModel {
     public String[] getSigningCertificates() {
         String crt = getConfig().get(SIGNING_CERTIFICATE_KEY);
         if (crt == null || crt.isEmpty()) {
-            return new String[] { };
+            return new String[] {};
         }
         // Note that "," is not coding character per PEM format specification:
-        // see https://tools.ietf.org/html/rfc1421, section 4.3.2.4 Step 4: Printable Encoding
+        // see https://tools.ietf.org/html/rfc1421, section 4.3.2.4 Step 4: Printable
+        // Encoding
         return crt.split(",");
     }
 
@@ -241,7 +260,8 @@ public class SpidIdentityProviderConfig extends IdentityProviderModel {
     public boolean isPostBindingLogout() {
         String postBindingLogout = getConfig().get(POST_BINDING_LOGOUT);
         if (postBindingLogout == null) {
-            // To maintain unchanged behavior when adding this field, we set the inital value to equal that
+            // To maintain unchanged behavior when adding this field, we set the inital
+            // value to equal that
             // of the binding for the response:
             return isPostBindingResponse();
         }
@@ -262,17 +282,20 @@ public class SpidIdentityProviderConfig extends IdentityProviderModel {
 
     /**
      * Always returns non-{@code null} result.
-     * @return Configured ransformer of {@link #DEFAULT_XML_KEY_INFO_KEY_NAME_TRANSFORMER} if not set.
+     * 
+     * @return Configured ransformer of
+     *         {@link #DEFAULT_XML_KEY_INFO_KEY_NAME_TRANSFORMER} if not set.
      */
     public XmlKeyInfoKeyNameTransformer getXmlSigKeyInfoKeyNameTransformer() {
-        return XmlKeyInfoKeyNameTransformer.from(getConfig().get(XML_SIG_KEY_INFO_KEY_NAME_TRANSFORMER), DEFAULT_XML_KEY_INFO_KEY_NAME_TRANSFORMER);
+        return XmlKeyInfoKeyNameTransformer.from(getConfig().get(XML_SIG_KEY_INFO_KEY_NAME_TRANSFORMER),
+                DEFAULT_XML_KEY_INFO_KEY_NAME_TRANSFORMER);
     }
 
     public void setXmlSigKeyInfoKeyNameTransformer(XmlKeyInfoKeyNameTransformer xmlSigKeyInfoKeyNameTransformer) {
         getConfig().put(XML_SIG_KEY_INFO_KEY_NAME_TRANSFORMER,
-          xmlSigKeyInfoKeyNameTransformer == null
-            ? null
-            : xmlSigKeyInfoKeyNameTransformer.name());
+                xmlSigKeyInfoKeyNameTransformer == null
+                        ? null
+                        : xmlSigKeyInfoKeyNameTransformer.name());
     }
 
     public int getAllowedClockSkew() {
@@ -305,9 +328,9 @@ public class SpidIdentityProviderConfig extends IdentityProviderModel {
 
     public void setPrincipalType(SamlPrincipalType principalType) {
         getConfig().put(PRINCIPAL_TYPE,
-            principalType == null
-                ? null
-                : principalType.name());
+                principalType == null
+                        ? null
+                        : principalType.name());
     }
 
     public String getPrincipalAttribute() {
@@ -319,15 +342,16 @@ public class SpidIdentityProviderConfig extends IdentityProviderModel {
     }
 
     public boolean isEnabledFromMetadata() {
-        return Boolean.valueOf(getConfig().get(ENABLED_FROM_METADATA ));
+        return Boolean.valueOf(getConfig().get(ENABLED_FROM_METADATA));
     }
 
     public void setEnabledFromMetadata(boolean enabled) {
-        getConfig().put(ENABLED_FROM_METADATA , String.valueOf(enabled));
+        getConfig().put(ENABLED_FROM_METADATA, String.valueOf(enabled));
     }
 
     public AuthnContextComparisonType getAuthnContextComparisonType() {
-        return AuthnContextComparisonType.fromValue(getConfig().getOrDefault(AUTHN_CONTEXT_COMPARISON_TYPE, AuthnContextComparisonType.EXACT.value()));
+        return AuthnContextComparisonType.fromValue(
+                getConfig().getOrDefault(AUTHN_CONTEXT_COMPARISON_TYPE, AuthnContextComparisonType.EXACT.value()));
     }
 
     public void setAuthnContextComparisonType(AuthnContextComparisonType authnContextComparisonType) {
@@ -357,7 +381,7 @@ public class SpidIdentityProviderConfig extends IdentityProviderModel {
     public void setSignSpMetadata(boolean signSpMetadata) {
         getConfig().put(SIGN_SP_METADATA, String.valueOf(signSpMetadata));
     }
-    
+
     public boolean isAllowCreate() {
         return Boolean.valueOf(getConfig().get(ALLOW_CREATE));
     }
@@ -428,10 +452,13 @@ public class SpidIdentityProviderConfig extends IdentityProviderModel {
 
         checkUrl(sslRequired, getSingleLogoutServiceUrl(), SINGLE_LOGOUT_SERVICE_URL);
         checkUrl(sslRequired, getSingleSignOnServiceUrl(), SINGLE_SIGN_ON_SERVICE_URL);
-        //transient name id format is not accepted together with principaltype SubjectnameId
-        if (JBossSAMLURIConstants.NAMEID_FORMAT_TRANSIENT.get().equals(getNameIDPolicyFormat()) && SamlPrincipalType.SUBJECT == getPrincipalType())
-            throw new IllegalArgumentException("Can not have Transient NameID Policy Format together with SUBJECT Principal Type");
-        
+        // transient name id format is not accepted together with principaltype
+        // SubjectnameId
+        if (JBossSAMLURIConstants.NAMEID_FORMAT_TRANSIENT.get().equals(getNameIDPolicyFormat())
+                && SamlPrincipalType.SUBJECT == getPrincipalType())
+            throw new IllegalArgumentException(
+                    "Can not have Transient NameID Policy Format together with SUBJECT Principal Type");
+
     }
 
     public boolean isSpPrivate() {
@@ -509,8 +536,128 @@ public class SpidIdentityProviderConfig extends IdentityProviderModel {
     public void setBillingContactCompany(String contactCompany) {
         getConfig().put(BILLING_CONTACT_COMPANY, contactCompany);
     }
-    
+
     public void setBillingContactPhone(String contactPhone) {
         getConfig().put(BILLING_CONTACT_PHONE, contactPhone);
+    }
+
+    public String getBillingIdPaese() {
+        return getConfig().get(BILLING_ID_PAESE);
+    }
+
+    public void setBillingIdPaese(String billingIdPaese) {
+        getConfig().put(BILLING_ID_PAESE, billingIdPaese);
+    }
+
+    public String getBillingIdCodice() {
+        return getConfig().get(BILLING_ID_CODICE);
+    }
+
+    public void setBillingIdCodice(String billingIdCodice) {
+        getConfig().put(BILLING_ID_CODICE, billingIdCodice);
+    }
+
+    public String getBillingAnagraficaDenominazione() {
+        return getConfig().get(BILLING_ANAGRAFICA_DENOMINAZIONE);
+    }
+
+    public void setBillingAnagraficaDenominazione(String billingAnagraficaDenominazione) {
+        getConfig().put(BILLING_ANAGRAFICA_DENOMINAZIONE, billingAnagraficaDenominazione);
+    }
+
+    public String getBillingSedeIndirizzo() {
+        return getConfig().get(BILLING_SEDE_INDIRIZZO);
+    }
+
+    public void setBillingSedeIndirizzo(String billingSedeIndirizzo) {
+        getConfig().put(BILLING_SEDE_INDIRIZZO, billingSedeIndirizzo);
+    }
+
+    public String getBillingSedeNumeroCivico() {
+        return getConfig().get(BILLING_SEDE_NUMERO_CIVICO);
+    }
+
+    public void setBillingSedeNumeroCivico(String billingSedeNumeroCivico) {
+        getConfig().put(BILLING_SEDE_NUMERO_CIVICO, billingSedeNumeroCivico);
+    }
+
+    public String getBillingSedeCap() {
+        return getConfig().get(BILLING_SEDE_CAP);
+    }
+
+    public void setBillingSedeCap(String billingSedeCap) {
+        getConfig().put(BILLING_SEDE_CAP, billingSedeCap);
+    }
+
+    public String getBillingSedeComune() {
+        return getConfig().get(BILLING_SEDE_COMUNE);
+    }
+
+    public void setBillingSedeComune(String billingSedeComune) {
+        getConfig().put(BILLING_SEDE_COMUNE, billingSedeComune);
+    }
+
+    public String getBillingSedeProvincia() {
+        return getConfig().get(BILLING_SEDE_PROVINCIA);
+    }
+
+    public void setBillingSedeProvincia(String billingSedeProvincia) {
+        getConfig().put(BILLING_SEDE_PROVINCIA, billingSedeProvincia);
+    }
+
+    public String getBillingSedeNazione() {
+        return getConfig().get(BILLING_SEDE_NAZIONE);
+    }
+
+    public void setBillingSedeNazione(String billingSedeNazione) {
+        getConfig().put(BILLING_SEDE_NAZIONE, billingSedeNazione);
+    }
+
+    public String getBillingTerzoIntermediarioSoggettoEmittente() {
+        return getConfig().get(BILLING_TERZO_INTERMEDIARIO_SOGGETTO_EMITTENTE);
+    }
+
+    public void setBillingTerzoIntermediarioSoggettoEmittente(String billingTerzoIntermediarioSoggettoEmittente) {
+        getConfig().put(BILLING_TERZO_INTERMEDIARIO_SOGGETTO_EMITTENTE, billingTerzoIntermediarioSoggettoEmittente);
+    }
+
+    public String getBillingCodiceFiscale() {
+        return getConfig().get(BILLING_CODICE_FISCALE);
+    }
+    
+    public void setBillingCodiceFiscale(String billingCodiceFiscale) {
+        getConfig().put(BILLING_CODICE_FISCALE, billingCodiceFiscale);
+    }
+    
+    public String getBillingAnagraficaNome() {
+        return getConfig().get(BILLING_ANAGRAFICA_NOME);
+    }
+    
+    public void setBillingAnagraficaNome(String billingAnagraficaNome) {
+        getConfig().put(BILLING_ANAGRAFICA_NOME, billingAnagraficaNome);
+    }
+    
+    public String getBillingAnagraficaCognome() {
+        return getConfig().get(BILLING_ANAGRAFICA_COGNOME);
+    }
+    
+    public void setBillingAnagraficaCognome(String billingAnagraficaCognome) {
+        getConfig().put(BILLING_ANAGRAFICA_COGNOME, billingAnagraficaCognome);
+    }
+    
+    public String getBillingAnagraficaTitolo() {
+        return getConfig().get(BILLING_ANAGRAFICA_TITOLO);
+    }
+    
+    public void setBillingAnagraficaTitolo(String billingAnagraficaTitolo) {
+        getConfig().put(BILLING_ANAGRAFICA_TITOLO, billingAnagraficaTitolo);
+    }
+    
+    public String getBillingAnagraficaCodiceEORI() {
+        return getConfig().get(BILLING_ANAGRAFICA_CODICE_EORI);
+    }
+    
+    public void setBillingAnagraficaCodiceEORI(String billingAnagraficaCodiceEORI) {
+        getConfig().put(BILLING_ANAGRAFICA_CODICE_EORI, billingAnagraficaCodiceEORI);
     }
 }

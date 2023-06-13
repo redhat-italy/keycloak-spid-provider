@@ -1,0 +1,21 @@
+<fpa:CessionarioCommittente xmlns:fpa="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2">
+    <fpa:DatiAnagrafici>
+        <fpa:IdFiscaleIVA>
+            <fpa:IdPaese>IT</fpa:IdPaese>
+            <fpa:IdCodice>+390123456789</fpa:IdCodice>
+        </fpa:IdFiscaleIVA>
+        <fpa:Anagrafica>
+            <fpa:Nome>Mario</fpa:Nome>
+            <fpa:Cognome>Rossi</fpa:Cognome>
+            <fpa:Titolo>Dottore</fpa:Titolo>
+        </fpa:Anagrafica>
+    </fpa:DatiAnagrafici>
+    <fpa:Sede>
+        <fpa:Indirizzo>via [...]</fpa:Indirizzo>
+        <fpa:NumeroCivico>99</fpa:NumeroCivico>
+        <fpa:CAP>12345</fpa:CAP>
+        <fpa:Comune>nome_citta</fpa:Comune>
+        <fpa:Provincia>XY</fpa:Provincia>
+        <fpa:Nazione>IT</fpa:Nazione>
+    </fpa:Sede>
+</fpa:CessionarioCommittente>
