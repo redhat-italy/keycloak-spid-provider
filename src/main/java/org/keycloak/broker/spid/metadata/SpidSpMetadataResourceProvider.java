@@ -467,8 +467,10 @@ public class SpidSpMetadataResourceProvider implements RealmResourceProvider {
                     billingContactPerson.addTelephone(billingContactPersonPhone);
 
                 // Add Cessionario Committente
-
                 helper.addCessionarioCommittente(billingContactPerson, config);
+
+                // Add TerzoIntermediarioSoggettoEmittente
+                helper.addTerzoIntermediarioSoggettoEmittente(billingContactPerson, config);
 
                 entityDescriptor.addContactPerson(billingContactPerson);
             }

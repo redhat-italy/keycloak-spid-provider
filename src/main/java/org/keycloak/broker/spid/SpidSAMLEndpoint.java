@@ -553,7 +553,7 @@ public class SpidSAMLEndpoint {
                 identity.setIdp(provider);
                 if (authn != null && authn.getSessionIndex() != null) {
                     identity.setBrokerSessionId(config.getAlias() + "." + authn.getSessionIndex());
-                 }
+                }
 
 
                 return callback.authenticated(identity);
@@ -1395,7 +1395,6 @@ public class SpidSAMLEndpoint {
 
         }
 
-        //FIXME: CessionarioCommittente
         //93 Assertion > AuthnStatement > AuthnContextClassRef missing note: response snippet same as #90
         if(authnContextClassRef==null){
             return  "SpidSamlCheck_93";
