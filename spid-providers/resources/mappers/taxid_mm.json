@@ -1,0 +1,11 @@
+{
+    "name": "Fiscal Number",
+    "identityProviderAlias": "CHANGE-IT",
+    "identityProviderMapper": "spid-user-attribute-idp-mapper",
+    "config": {
+        "syncMode": "INHERIT",
+        "user.attribute": "spid-fiscalNumber",
+        "attribute": "fiscalNumber",
+        "attribute.name": "fiscalNumber"
+    }
+}

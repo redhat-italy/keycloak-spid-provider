@@ -1,0 +1,11 @@
+{
+    "name": "Place Of Birth",
+    "identityProviderAlias": "CHANGE-IT",
+    "identityProviderMapper": "spid-user-attribute-idp-mapper",
+    "config": {
+        "syncMode": "INHERIT",
+        "user.attribute": "spid-placeOfBirth",
+        "attribute": "placeOfBirth",
+        "attribute.name": "placeOfBirth"
+    }
+}

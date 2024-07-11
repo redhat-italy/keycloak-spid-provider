@@ -28,6 +28,8 @@ import org.keycloak.dom.saml.v2.metadata.EndpointType;
 import org.keycloak.dom.saml.v2.metadata.EntityDescriptorType;
 import org.keycloak.dom.saml.v2.metadata.ExtensionsType;
 import org.keycloak.dom.saml.v2.metadata.IndexedEndpointType;
+import org.keycloak.dom.saml.v2.metadata.KeyDescriptorType;
+import org.keycloak.dom.saml.v2.metadata.KeyTypes;
 import org.keycloak.dom.saml.v2.metadata.LocalizedNameType;
 import org.keycloak.dom.saml.v2.metadata.LocalizedURIType;
 import org.keycloak.dom.saml.v2.metadata.OrganizationType;
@@ -54,17 +56,9 @@ import java.net.URISyntaxException;
 import java.security.KeyPair;
 import java.security.PrivateKey;
 import java.security.PublicKey;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
-
-import javax.ws.rs.GET;
-import javax.ws.rs.Produces;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.UriBuilder;
-import javax.ws.rs.core.UriInfo;
 
 import javax.xml.crypto.dsig.CanonicalizationMethod;
 import javax.xml.parsers.ParserConfigurationException;
@@ -73,6 +67,14 @@ import javax.xml.stream.XMLStreamWriter;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
+
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.UriBuilder;
+import jakarta.ws.rs.core.UriInfo;
+
 import org.keycloak.broker.provider.IdentityProviderMapper;
 import org.keycloak.broker.spid.SpidIdentityProvider;
 import org.keycloak.broker.spid.SpidIdentityProviderConfig;
@@ -105,13 +107,13 @@ public class SpidSpMetadataResourceProvider implements RealmResourceProvider {
             List<IdentityProviderModel> lstSpidIdentityProviders = realm.getIdentityProvidersStream()
                     .filter(t -> t.getProviderId().equals(SpidIdentityProviderFactory.PROVIDER_ID) &&
                             t.isEnabled())
-                    .sorted((o1, o2) -> o1.getAlias().compareTo(o2.getAlias()))
-                    .collect(Collectors.toList());
+                    .sorted(this::compareByGuiOrderOrAlias)
+                    .toList();
 
             if (lstSpidIdentityProviders.isEmpty())
                 throw new Exception("No SPID providers found!");
 
-            // Create an instance of the first SPID Identity Provider in alphabetical order
+            // Create an instance of the first SPID Identity Provider in gui or, as a fallback, alphabetical order
             SpidIdentityProviderFactory providerFactory = new SpidIdentityProviderFactory();
             SpidIdentityProvider firstSpidProvider = providerFactory.create(session, lstSpidIdentityProviders.get(0));
 
@@ -147,8 +149,8 @@ public class SpidSpMetadataResourceProvider implements RealmResourceProvider {
                     ? attributeConsumingServiceName.split(",")
                     : null;
 
-            List<Element> signingKeys = new LinkedList<>();
-            List<Element> encryptionKeys = new LinkedList<>();
+            List<KeyDescriptorType> signingKeys = new LinkedList<>();
+            List<KeyDescriptorType> encryptionKeys = new LinkedList<>();
 
             session.keys().getKeysStream(realm, KeyUse.SIG, Algorithm.RS256)
                     .filter(Objects::nonNull)
@@ -159,10 +161,10 @@ public class SpidSpMetadataResourceProvider implements RealmResourceProvider {
                             Element element = SPMetadataDescriptor
                                     .buildKeyInfoElement(key.getKid(),
                                             PemUtils.encodeCertificate(key.getCertificate()));
-                            signingKeys.add(element);
+                            signingKeys.add(asSigningKeyDescriptor(element));
 
                             if (key.getStatus() == KeyStatus.ACTIVE) {
-                                encryptionKeys.add(element);
+                                encryptionKeys.add(asEncryptionKeyDescriptor(element));
                             }
                         } catch (ParserConfigurationException e) {
                             logger.warn("Failed to export SAML SP Metadata!", e);
@@ -175,7 +177,7 @@ public class SpidSpMetadataResourceProvider implements RealmResourceProvider {
             XMLStreamWriter writer = StaxUtil.getXMLStreamWriter(sw);
             SAMLMetadataWriter metadataWriter = new SAMLMetadataWriter(writer);
 
-            EntityDescriptorType entityDescriptor = SPMetadataDescriptor.buildSPdescriptor(
+            EntityDescriptorType entityDescriptor = SPMetadataDescriptor.buildSPDescriptor(
                     authnBinding, authnBinding, endpoint, endpoint,
                     wantAuthnRequestsSigned, wantAssertionsSigned, wantAssertionsEncrypted,
                     entityId, nameIDPolicyFormat, signingKeys, encryptionKeys);
@@ -297,7 +299,6 @@ public class SpidSpMetadataResourceProvider implements RealmResourceProvider {
             if (firstSpidProvider.getConfig().isSignSpMetadata()) {
 
                 KeyWrapper activeKey = session.keys().getActiveKey(realm, KeyUse.SIG, Algorithm.RS256);
-                // KeyManager.ActiveRsaKey activeKey = session.keys().getActiveRsaKey(realm);
                 String keyName = firstSpidProvider.getConfig().getXmlSigKeyInfoKeyNameTransformer()
                         .getKeyName(activeKey.getKid(), activeKey.getCertificate());
                 KeyPair keyPair = new KeyPair((PublicKey) activeKey.getPublicKey(),
@@ -322,6 +323,39 @@ public class SpidSpMetadataResourceProvider implements RealmResourceProvider {
             logger.warn("Failed to export SAML SP Metadata!", e);
             throw new RuntimeException(e);
         }
+    }
+
+    private int compareByGuiOrderOrAlias(IdentityProviderModel id1, IdentityProviderModel id2){
+        String guiOrder1 = id1.getConfig().get("guiOrder");
+        String guiOrder2 = id2.getConfig().get("guiOrder");
+
+        if (guiOrder1 != null && guiOrder2 != null){
+            int o1 = 0;
+            int o2 = 0;
+            try{
+                o1 = Integer.parseInt(guiOrder1);
+                o2 = Integer.parseInt(guiOrder2);
+            }catch ( NumberFormatException e){
+                logger.warn("Cannot parse guiOrder");
+            }
+            return Integer.compare(o1, o2);
+        }else{
+            return id1.getAlias().compareTo(id2.getAlias());
+        }
+    }
+
+    private static KeyDescriptorType asSigningKeyDescriptor(Element value){
+        KeyDescriptorType result = new KeyDescriptorType();
+        result.setKeyInfo(value);
+        result.setUse(KeyTypes.SIGNING);
+        return result;
+    }
+
+    private static KeyDescriptorType asEncryptionKeyDescriptor(Element value){
+        KeyDescriptorType result = new KeyDescriptorType();
+        result.setKeyInfo(value);
+        result.setUse(KeyTypes.ENCRYPTION);
+        return result;
     }
 
     private String getEntityId(String configEntityId, UriInfo uriInfo, RealmModel realm) {

@@ -1,6 +1,8 @@
 package org.keycloak.broker.spid.metadata;
 
-import static org.junit.Assert.assertEquals;
+
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.io.IOException;
 import java.io.StringWriter;
@@ -17,23 +19,24 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
+
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.keycloak.broker.spid.SpidIdentityProviderConfig;
 import org.keycloak.dom.saml.v2.metadata.ContactType;
 import org.keycloak.dom.saml.v2.metadata.ContactTypeType;
 import org.keycloak.saml.common.exceptions.ConfigurationException;
 import org.w3c.dom.Element;
 
-public class SpidSPMetadataResourceHelperTest {
+class SpidSPMetadataResourceHelperTest {
 
     private SpidSPMetadataResourceHelper helper;
     private static SpidIdentityProviderConfig defaultConfig = new SpidIdentityProviderConfig();
     private static SpidIdentityProviderConfig defaultConfigNomeCognome = new SpidIdentityProviderConfig();
 
 
-    @BeforeClass
+    @BeforeAll
     public static void initClass() {
         //If the test will grow we will consider an object mother pattern
         defaultConfig.setBillingIdPaese("IT");
@@ -62,13 +65,13 @@ public class SpidSPMetadataResourceHelperTest {
 
     }
 
-    @Before
-    public void init() {
+    @BeforeEach
+    void init() {
         helper = new SpidSPMetadataResourceHelper();
     }
 
     @Test
-    public void testCessionarioCommittenteBillingExtension()
+    void testCessionarioCommittenteBillingExtension()
             throws ConfigurationException, TransformerException, IOException {
         final String expected = Files.readString(Paths.get("src/test/resources/cessionarioCommittente.xml"));
 
@@ -81,7 +84,7 @@ public class SpidSPMetadataResourceHelperTest {
     }
 
     @Test
-    public void testCessionarioCommittenteBillingExtensionNomeCognome()
+    void testCessionarioCommittenteBillingExtensionNomeCognome()
             throws ConfigurationException, TransformerException, IOException {
         final String expected = Files.readString(Paths.get("src/test/resources/cessionarioCommittenteNomeCognome.xml"));
 
@@ -94,7 +97,7 @@ public class SpidSPMetadataResourceHelperTest {
     }
 
     @Test
-    public void testTerzoIntermediarioSoggettoEmittenteBillingExtension()
+    void testTerzoIntermediarioSoggettoEmittenteBillingExtension()
             throws ConfigurationException, TransformerException, IOException {
         final String expected = "<fpa:TerzoIntermediarioSoggettoEmittente xmlns:fpa=\"http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2\">terzo_intermediario_soggetto_emittente</fpa:TerzoIntermediarioSoggettoEmittente>\n";
 

@@ -1,0 +1,11 @@
+{
+    "name": "Company Name",
+    "identityProviderAlias": "CHANGE-IT",
+    "identityProviderMapper": "spid-user-attribute-idp-mapper",
+    "config": {
+        "syncMode": "INHERIT",
+        "user.attribute": "spid-companyName",
+        "attribute": "companyName",
+        "attribute.name": "companyName"
+    }
+}

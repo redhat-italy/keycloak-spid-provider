@@ -1,0 +1,28 @@
+<?xml version="1.0"?>
+<samlp:AuthnRequest xmlns:samlp="urn:oasis:names:tc:SAML:2.0:protocol" xmlns="urn:oasis:names:tc:SAML:2.0:assertion" xmlns:saml="urn:oasis:names:tc:SAML:2.0:assertion" AssertionConsumerServiceURL="https://im.cdc.it/realms/external/broker/spidtestidp/endpoint" AttributeConsumingServiceIndex="1" Destination="https://validator.spid.gov.it/samlsso" ForceAuthn="true" ID="ID_6e111398-4bbc-4fa9-9b03-fa45ae5782e1" IssueInstant="2024-04-08T14:46:15.078Z" ProtocolBinding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST" Version="2.0">
+  <saml:Issuer Format="urn:oasis:names:tc:SAML:2.0:nameid-format:entity" NameQualifier="https://im.cdc.it">https://im.cdc.it</saml:Issuer>
+  <dsig:Signature xmlns:dsig="http://www.w3.org/2000/09/xmldsig#">
+    <dsig:SignedInfo>
+      <dsig:CanonicalizationMethod Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#"/>
+      <dsig:SignatureMethod Algorithm="http://www.w3.org/2001/04/xmldsig-more#rsa-sha256"/>
+      <dsig:Reference URI="#ID_6e111398-4bbc-4fa9-9b03-fa45ae5782e1">
+        <dsig:Transforms>
+          <dsig:Transform Algorithm="http://www.w3.org/2000/09/xmldsig#enveloped-signature"/>
+          <dsig:Transform Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#"/>
+        </dsig:Transforms>
+        <dsig:DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha256"/>
+        <dsig:DigestValue>1cu/vRFJt+NQPYsKZts/BxiGlLEHW3h62/X31TIdnAY=</dsig:DigestValue>
+      </dsig:Reference>
+    </dsig:SignedInfo>
+    <dsig:SignatureValue>PV0p/g8fnTjBrY3nhVZcpY3szJSmn5kgvt1WatYQye/aq+JMsuj6zhoSt5s5qgivZyeOYdbQUW7UlQyLf9N9e602fJJYEoDqkaffMwDi84a+yklaUxBsa4To79oiD+0bz8LNiS+haePU38H9QniSFXXYsnhFjJe0PhuylK4JCPbrmQUGU1/IHDKthKxfYZZaSObJKbhttqEHtYvrgGMESUldlDTsjzrLU/S9MOLcqTEEpO0FwfWacsVZ3K9dxbec59RvUwqWCCfyH6NzrezfXTpmDODHnD9iH//e25hUCa8EJWgep81MS67BJ8bub2J9eN+1mrwTchBPAQNRSmdLJL5gRYEgEsYzsE4RPAqekdSwzNkepyu2x47YR34WmGe9+TaUsw+hj94cLwV3xe9v+St1Q0bfzI44MbLq3o80dp6UM0jT0qY1wUWnPylync4ZidUYhOOYqhLJkEkefizsTYKgLiizcl4Q0a7XXUmpLPwkIsCZhcC1AfRLtaN5UO9Q</dsig:SignatureValue>
+    <dsig:KeyInfo>
+      <dsig:X509Data>
+        <dsig:X509Certificate>MIIGsDCCBRigAwIBAgIUMcVsHz4mB3z88NgQBaY/R5+/2GswDQYJKoZIhvcNAQELBQAwgbgxVzBVBgNVBAoMTkNhc3NhIE5hemlvbmFsZSBkaSBQcmV2aWRlbnphIGUgQXNzaXN0ZW56YSBhIGZhdm9yZSBEZWkgRG90dG9yaSBDb21tZXJjaWFsaXN0aTEPMA0GA1UEAwwGQ05QQURDMRowGAYDVQRTDBFodHRwczovL2ltLmNkYy5pdDEUMBIGA1UEYQwLUEE6SVQtY25wYWYxCzAJBgNVBAYTAklUMQ0wCwYDVQQHDARSb21hMB4XDTI0MDIyMjE1MjAxMVoXDTM0MDIxOTE1MjAxMVowgbgxVzBVBgNVBAoMTkNhc3NhIE5hemlvbmFsZSBkaSBQcmV2aWRlbnphIGUgQXNzaXN0ZW56YSBhIGZhdm9yZSBEZWkgRG90dG9yaSBDb21tZXJjaWFsaXN0aTEPMA0GA1UEAwwGQ05QQURDMRowGAYDVQRTDBFodHRwczovL2ltLmNkYy5pdDEUMBIGA1UEYQwLUEE6SVQtY25wYWYxCzAJBgNVBAYTAklUMQ0wCwYDVQQHDARSb21hMIIBojANBgkqhkiG9w0BAQEFAAOCAY8AMIIBigKCAYEA3IjlWR6i0Kruz+EBqBiHHqwg3GwmE3qI6VLETbbQZlrMyi8TwjAbPw8EkRK7r5FGuVvJOX0zcfhTJt1N2brRvPPyej+TlxFipNnSIv+NqecvwoD0StMMAHzb7t0shDfxDHvLoIWhFXBI6eO+TCBj59Rm/ZzM0HHDkjmhU41npz+TrapOInbKrCvlnPa0yqxmsnF6AHGXqysaVU7AGO6MfpJPRT5kTOZF6YngOGMVco8mEz1lbeIIjVJcT61IGxIKA3rd3X4QVV/SlrYJJZCNFz8inO7nJ0FWEeRnYSznDfwUwQOPeOJfdQO+CCqTrOYFNRkBBked3YjedECXnE83a+D19Mi2JYeviUEZ3EYrV3XMa/zlbOMM/7kKpNVXO8NAO1kRa8JsNEjgXMAB7sSSAYBoarF71Tb5LakduZZyGoNGmCCgbgwjMJ8J2GxkwhFbi1O042HcPDiMJ0a/jmCO0gKcu2Q5gdwG///CO6vzF0KYPXplxAsUApSclGrHqs67AgMBAAGjggGuMIIBqjAJBgNVHRMEAjAAMA4GA1UdDwEB/wQEAwIGwDBzBgNVHSAEbDBqMB8GAytMEDAYMBYGCCsGAQUFBwICMAoMCEFnSURyb290MCAGBCtMEAYwGDAWBggrBgEFBQcCAjAKDAhhZ0lEY2VydDAlBgYrTBAEAgEwGzAZBggrBgEFBQcCAjANDAtjZXJ0X1NQX1B1YjAdBgNVHQ4EFgQUGcqOgtTU1qDpi/y0rglQ4hsvMSwwgfgGA1UdIwSB8DCB7YAUGcqOgtTU1qDpi/y0rglQ4hsvMSyhgb6kgbswgbgxVzBVBgNVBAoMTkNhc3NhIE5hemlvbmFsZSBkaSBQcmV2aWRlbnphIGUgQXNzaXN0ZW56YSBhIGZhdm9yZSBEZWkgRG90dG9yaSBDb21tZXJjaWFsaXN0aTEPMA0GA1UEAwwGQ05QQURDMRowGAYDVQRTDBFodHRwczovL2ltLmNkYy5pdDEUMBIGA1UEYQwLUEE6SVQtY25wYWYxCzAJBgNVBAYTAklUMQ0wCwYDVQQHDARSb21hghQxxWwfPiYHfPzw2BAFpj9Hn7/YazANBgkqhkiG9w0BAQsFAAOCAYEAON+zZCsuz2MoWOt1H2+os4LCG84NCe/EiBWuuIlvGmXxa7QzrgE/+LsbJREQN5s3nQYL/XWFGN4zPEsVoZwvay84FLQn0SfnGEs50KXDHSlLdt9MRIalSuuiiZvDOhv96DN2sdICbE0nKbee0Hs52hPrl3oQxnmFQpmPDLD/G4+FdRppD2Ogzb3Z2wAn27Q0QPGdhEv6O8D2V9SRJ8keFcgG/5KGBy3WBjG0XZSrwIly7JdgajeLHzUN++0ntyxJL8ouX7Bz2+pN7EbnzwcG4lgQqT4nLG6dEX1VB8EBPdKIotNiWI1lheG323Q176EYLoXX9Z1+CQB7U0WS+ye61qtzV+f7XLlKwAByjAjEan1lMQbLn+yuili5zR8v5pozHAXz74aFy+/97VDxIT5K/aNxYlaYb/QPhl8qWy+q95CpDI3sSCnH/2aAq/xt6z/XkJ5E+B9ZaumHPJJ6RWRjPxgtwu/SYXn8R5BC1iZDT7Lh9mxbFa8AkoH/WRXMtNcN</dsig:X509Certificate>
+      </dsig:X509Data>
+    </dsig:KeyInfo>
+  </dsig:Signature>
+  <samlp:NameIDPolicy Format="urn:oasis:names:tc:SAML:2.0:nameid-format:transient" SPNameQualifier="https://im.cdc.it"/>
+  <samlp:RequestedAuthnContext Comparison="exact">
+    <saml:AuthnContextClassRef>https://www.spid.gov.it/SpidL2</saml:AuthnContextClassRef>
+  </samlp:RequestedAuthnContext>
+</samlp:AuthnRequest>

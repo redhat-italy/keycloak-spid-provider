@@ -64,7 +64,7 @@ public class SpidUsernameTemplateMapper extends UsernameTemplateMapper  {
 
     private void setUserNameFromTemplate(IdentityProviderMapperModel mapperModel, BrokeredIdentityContext context) {
         AssertionType assertion = (AssertionType)context.getContextData().get("SAML_ASSERTION");
-        String template = (String)mapperModel.getConfig().get("template");
+        String template = mapperModel.getConfig().get("template");
         Matcher m = SUBSTITUTION.matcher(template);
         StringBuffer sb = new StringBuffer();
 
@@ -76,14 +76,14 @@ public class SpidUsernameTemplateMapper extends UsernameTemplateMapper  {
                 var10001.getClass();
                 UnaryOperator<String> transformer = (UnaryOperator)var10000.map(var10001::get).orElse(UnaryOperator.identity());
                 if (variable.equals("ALIAS")) {
-                    m.appendReplacement(sb, (String)transformer.apply(context.getIdpConfig().getAlias()));
+                    m.appendReplacement(sb, transformer.apply(context.getIdpConfig().getAlias()));
                 } else if (variable.equals("UUID")) {
-                    m.appendReplacement(sb, (String)transformer.apply(KeycloakModelUtils.generateId()));
+                    m.appendReplacement(sb, transformer.apply(KeycloakModelUtils.generateId()));
                 } else if (variable.equals("NAMEID")) {
                     SubjectType subject = assertion.getSubject();
                     SubjectType.STSubType subType = subject.getSubType();
                     NameIDType subjectNameID = (NameIDType)subType.getBaseID();
-                    m.appendReplacement(sb, (String)transformer.apply(subjectNameID.getValue()));
+                    m.appendReplacement(sb, transformer.apply(subjectNameID.getValue()));
                 } else if (!variable.startsWith("ATTRIBUTE.")) {
                     m.appendReplacement(sb, m.group(1));
                 } else {
@@ -114,7 +114,7 @@ public class SpidUsernameTemplateMapper extends UsernameTemplateMapper  {
                             value = value.split("^(?i)TINIT-")[1];
 
 
-                        m.appendReplacement(sb, (String)transformer.apply(value));
+                        m.appendReplacement(sb,transformer.apply(value));
                         break;
                     }
                 }

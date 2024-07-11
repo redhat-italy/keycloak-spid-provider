@@ -1,0 +1,11 @@
+{
+    "name": "Date Of Birth",
+    "identityProviderAlias": "CHANGE-IT",
+    "identityProviderMapper": "spid-user-attribute-idp-mapper",
+    "config": {
+        "syncMode": "INHERIT",
+        "user.attribute": "spid-dateOfBirth",
+        "attribute": "dateOfBirth",
+        "attribute.name": "dateOfBirth"
+    }
+}

@@ -18,14 +18,23 @@ package org.keycloak.broker.spid;
 
 import static org.keycloak.common.util.UriUtils.checkUrl;
 
+import java.util.List;
+import java.util.spi.ResourceBundleProvider;
+
 import org.keycloak.common.enums.SslRequired;
 import org.keycloak.dom.saml.v2.protocol.AuthnContextComparisonType;
 import org.keycloak.models.IdentityProviderModel;
 import org.keycloak.models.RealmModel;
 import org.keycloak.protocol.saml.SamlPrincipalType;
+import org.keycloak.provider.ProviderConfigProperty;
+import org.keycloak.provider.ProviderConfigurationBuilder;
 import org.keycloak.saml.common.constants.JBossSAMLURIConstants;
 import org.keycloak.saml.common.util.XmlKeyInfoKeyNameTransformer;
+import org.keycloak.services.messages.Messages;
 
+/**
+ * @author Pedro Igor
+ */
 public class SpidIdentityProviderConfig extends IdentityProviderModel {
 
     public static final XmlKeyInfoKeyNameTransformer DEFAULT_XML_KEY_INFO_KEY_NAME_TRANSFORMER = XmlKeyInfoKeyNameTransformer.NONE;
@@ -41,6 +50,7 @@ public class SpidIdentityProviderConfig extends IdentityProviderModel {
     public static final String POST_BINDING_LOGOUT = "postBindingLogout";
     public static final String POST_BINDING_RESPONSE = "postBindingResponse";
     public static final String SIGNATURE_ALGORITHM = "signatureAlgorithm";
+    public static final String ENCRYPTION_ALGORITHM = "encryptionAlgorithm";
     public static final String SIGNING_CERTIFICATE_KEY = "signingCertificate";
     public static final String SINGLE_LOGOUT_SERVICE_URL = "singleLogoutServiceUrl";
     public static final String SINGLE_SIGN_ON_SERVICE_URL = "singleSignOnServiceUrl";
@@ -51,7 +61,7 @@ public class SpidIdentityProviderConfig extends IdentityProviderModel {
     public static final String WANT_ASSERTIONS_SIGNED = "wantAssertionsSigned";
     public static final String WANT_AUTHN_REQUESTS_SIGNED = "wantAuthnRequestsSigned";
     public static final String XML_SIG_KEY_INFO_KEY_NAME_TRANSFORMER = "xmlSigKeyInfoKeyNameTransformer";
-    public static final String ENABLED_FROM_METADATA = "enabledFromMetadata";
+    public static final String ENABLED_FROM_METADATA  = "enabledFromMetadata";
     public static final String AUTHN_CONTEXT_COMPARISON_TYPE = "authnContextComparisonType";
     public static final String AUTHN_CONTEXT_CLASS_REFS = "authnContextClassRefs";
     public static final String AUTHN_CONTEXT_DECL_REFS = "authnContextDeclRefs";
@@ -129,7 +139,7 @@ public class SpidIdentityProviderConfig extends IdentityProviderModel {
     }
 
     public boolean isValidateSignature() {
-        return Boolean.valueOf(getConfig().get(VALIDATE_SIGNATURE));
+        return Boolean.parseBoolean(getConfig().get(VALIDATE_SIGNATURE));
     }
 
     public void setValidateSignature(boolean validateSignature) {
@@ -137,7 +147,7 @@ public class SpidIdentityProviderConfig extends IdentityProviderModel {
     }
 
     public boolean isForceAuthn() {
-        return Boolean.valueOf(getConfig().get(FORCE_AUTHN));
+        return Boolean.parseBoolean(getConfig().get(FORCE_AUTHN));
     }
 
     public void setForceAuthn(boolean forceAuthn) {
@@ -146,7 +156,6 @@ public class SpidIdentityProviderConfig extends IdentityProviderModel {
 
     /**
      * @deprecated Prefer {@link #getSigningCertificates()}}
-     * @param signingCertificate
      */
     @Deprecated
     public String getSigningCertificate() {
@@ -168,8 +177,7 @@ public class SpidIdentityProviderConfig extends IdentityProviderModel {
             getConfig().put(SIGNING_CERTIFICATE_KEY, signingCertificate);
         } else {
             // Note that "," is not coding character per PEM format specification:
-            // see https://tools.ietf.org/html/rfc1421, section 4.3.2.4 Step 4: Printable
-            // Encoding
+            // see https://tools.ietf.org/html/rfc1421, section 4.3.2.4 Step 4: Printable Encoding
             getConfig().put(SIGNING_CERTIFICATE_KEY, crt + "," + signingCertificate);
         }
     }
@@ -177,11 +185,10 @@ public class SpidIdentityProviderConfig extends IdentityProviderModel {
     public String[] getSigningCertificates() {
         String crt = getConfig().get(SIGNING_CERTIFICATE_KEY);
         if (crt == null || crt.isEmpty()) {
-            return new String[] {};
+            return new String[] { };
         }
         // Note that "," is not coding character per PEM format specification:
-        // see https://tools.ietf.org/html/rfc1421, section 4.3.2.4 Step 4: Printable
-        // Encoding
+        // see https://tools.ietf.org/html/rfc1421, section 4.3.2.4 Step 4: Printable Encoding
         return crt.split(",");
     }
 
@@ -194,7 +201,7 @@ public class SpidIdentityProviderConfig extends IdentityProviderModel {
     }
 
     public boolean isWantAuthnRequestsSigned() {
-        return Boolean.valueOf(getConfig().get(WANT_AUTHN_REQUESTS_SIGNED));
+        return Boolean.parseBoolean(getConfig().get(WANT_AUTHN_REQUESTS_SIGNED));
     }
 
     public void setWantAuthnRequestsSigned(boolean wantAuthnRequestsSigned) {
@@ -202,7 +209,7 @@ public class SpidIdentityProviderConfig extends IdentityProviderModel {
     }
 
     public boolean isWantAssertionsSigned() {
-        return Boolean.valueOf(getConfig().get(WANT_ASSERTIONS_SIGNED));
+        return Boolean.parseBoolean(getConfig().get(WANT_ASSERTIONS_SIGNED));
     }
 
     public void setWantAssertionsSigned(boolean wantAssertionsSigned) {
@@ -210,7 +217,7 @@ public class SpidIdentityProviderConfig extends IdentityProviderModel {
     }
 
     public boolean isWantAssertionsEncrypted() {
-        return Boolean.valueOf(getConfig().get(WANT_ASSERTIONS_ENCRYPTED));
+        return Boolean.parseBoolean(getConfig().get(WANT_ASSERTIONS_ENCRYPTED));
     }
 
     public void setWantAssertionsEncrypted(boolean wantAssertionsEncrypted) {
@@ -218,7 +225,7 @@ public class SpidIdentityProviderConfig extends IdentityProviderModel {
     }
 
     public boolean isAddExtensionsElementWithKeyInfo() {
-        return Boolean.valueOf(getConfig().get(ADD_EXTENSIONS_ELEMENT_WITH_KEY_INFO));
+        return Boolean.parseBoolean(getConfig().get(ADD_EXTENSIONS_ELEMENT_WITH_KEY_INFO));
     }
 
     public void setAddExtensionsElementWithKeyInfo(boolean addExtensionsElementWithKeyInfo) {
@@ -233,6 +240,14 @@ public class SpidIdentityProviderConfig extends IdentityProviderModel {
         getConfig().put(SIGNATURE_ALGORITHM, signatureAlgorithm);
     }
 
+    public String getEncryptionAlgorithm() {
+        return getConfig().get(ENCRYPTION_ALGORITHM);
+    }
+
+    public void setEncryptionAlgorithm(String encryptionAlgorithm) {
+        getConfig().put(ENCRYPTION_ALGORITHM, encryptionAlgorithm);
+    }
+
     public String getEncryptionPublicKey() {
         return getConfig().get(ENCRYPTION_PUBLIC_KEY);
     }
@@ -242,7 +257,7 @@ public class SpidIdentityProviderConfig extends IdentityProviderModel {
     }
 
     public boolean isPostBindingAuthnRequest() {
-        return Boolean.valueOf(getConfig().get(POST_BINDING_AUTHN_REQUEST));
+        return Boolean.parseBoolean(getConfig().get(POST_BINDING_AUTHN_REQUEST));
     }
 
     public void setPostBindingAuthnRequest(boolean postBindingAuthnRequest) {
@@ -250,7 +265,7 @@ public class SpidIdentityProviderConfig extends IdentityProviderModel {
     }
 
     public boolean isPostBindingResponse() {
-        return Boolean.valueOf(getConfig().get(POST_BINDING_RESPONSE));
+        return Boolean.parseBoolean(getConfig().get(POST_BINDING_RESPONSE));
     }
 
     public void setPostBindingResponse(boolean postBindingResponse) {
@@ -260,12 +275,11 @@ public class SpidIdentityProviderConfig extends IdentityProviderModel {
     public boolean isPostBindingLogout() {
         String postBindingLogout = getConfig().get(POST_BINDING_LOGOUT);
         if (postBindingLogout == null) {
-            // To maintain unchanged behavior when adding this field, we set the inital
-            // value to equal that
+            // To maintain unchanged behavior when adding this field, we set the inital value to equal that
             // of the binding for the response:
             return isPostBindingResponse();
         }
-        return Boolean.valueOf(postBindingLogout);
+        return Boolean.parseBoolean(postBindingLogout);
     }
 
     public void setPostBindingLogout(boolean postBindingLogout) {
@@ -273,7 +287,7 @@ public class SpidIdentityProviderConfig extends IdentityProviderModel {
     }
 
     public boolean isBackchannelSupported() {
-        return Boolean.valueOf(getConfig().get(BACKCHANNEL_SUPPORTED));
+        return Boolean.parseBoolean(getConfig().get(BACKCHANNEL_SUPPORTED));
     }
 
     public void setBackchannelSupported(boolean backchannel) {
@@ -282,20 +296,17 @@ public class SpidIdentityProviderConfig extends IdentityProviderModel {
 
     /**
      * Always returns non-{@code null} result.
-     * 
-     * @return Configured ransformer of
-     *         {@link #DEFAULT_XML_KEY_INFO_KEY_NAME_TRANSFORMER} if not set.
+     * @return Configured ransformer of {@link #DEFAULT_XML_KEY_INFO_KEY_NAME_TRANSFORMER} if not set.
      */
     public XmlKeyInfoKeyNameTransformer getXmlSigKeyInfoKeyNameTransformer() {
-        return XmlKeyInfoKeyNameTransformer.from(getConfig().get(XML_SIG_KEY_INFO_KEY_NAME_TRANSFORMER),
-                DEFAULT_XML_KEY_INFO_KEY_NAME_TRANSFORMER);
+        return XmlKeyInfoKeyNameTransformer.from(getConfig().get(XML_SIG_KEY_INFO_KEY_NAME_TRANSFORMER), DEFAULT_XML_KEY_INFO_KEY_NAME_TRANSFORMER);
     }
 
     public void setXmlSigKeyInfoKeyNameTransformer(XmlKeyInfoKeyNameTransformer xmlSigKeyInfoKeyNameTransformer) {
         getConfig().put(XML_SIG_KEY_INFO_KEY_NAME_TRANSFORMER,
-                xmlSigKeyInfoKeyNameTransformer == null
-                        ? null
-                        : xmlSigKeyInfoKeyNameTransformer.name());
+          xmlSigKeyInfoKeyNameTransformer == null
+            ? null
+            : xmlSigKeyInfoKeyNameTransformer.name());
     }
 
     public int getAllowedClockSkew() {
@@ -328,9 +339,9 @@ public class SpidIdentityProviderConfig extends IdentityProviderModel {
 
     public void setPrincipalType(SamlPrincipalType principalType) {
         getConfig().put(PRINCIPAL_TYPE,
-                principalType == null
-                        ? null
-                        : principalType.name());
+            principalType == null
+                ? null
+                : principalType.name());
     }
 
     public String getPrincipalAttribute() {
@@ -342,16 +353,15 @@ public class SpidIdentityProviderConfig extends IdentityProviderModel {
     }
 
     public boolean isEnabledFromMetadata() {
-        return Boolean.valueOf(getConfig().get(ENABLED_FROM_METADATA));
+        return Boolean.valueOf(getConfig().get(ENABLED_FROM_METADATA ));
     }
 
     public void setEnabledFromMetadata(boolean enabled) {
-        getConfig().put(ENABLED_FROM_METADATA, String.valueOf(enabled));
+        getConfig().put(ENABLED_FROM_METADATA , String.valueOf(enabled));
     }
 
     public AuthnContextComparisonType getAuthnContextComparisonType() {
-        return AuthnContextComparisonType.fromValue(
-                getConfig().getOrDefault(AUTHN_CONTEXT_COMPARISON_TYPE, AuthnContextComparisonType.EXACT.value()));
+        return AuthnContextComparisonType.fromValue(getConfig().getOrDefault(AUTHN_CONTEXT_COMPARISON_TYPE, AuthnContextComparisonType.EXACT.value()));
     }
 
     public void setAuthnContextComparisonType(AuthnContextComparisonType authnContextComparisonType) {
@@ -381,7 +391,7 @@ public class SpidIdentityProviderConfig extends IdentityProviderModel {
     public void setSignSpMetadata(boolean signSpMetadata) {
         getConfig().put(SIGN_SP_METADATA, String.valueOf(signSpMetadata));
     }
-
+    
     public boolean isAllowCreate() {
         return Boolean.valueOf(getConfig().get(ALLOW_CREATE));
     }
@@ -452,13 +462,10 @@ public class SpidIdentityProviderConfig extends IdentityProviderModel {
 
         checkUrl(sslRequired, getSingleLogoutServiceUrl(), SINGLE_LOGOUT_SERVICE_URL);
         checkUrl(sslRequired, getSingleSignOnServiceUrl(), SINGLE_SIGN_ON_SERVICE_URL);
-        // transient name id format is not accepted together with principaltype
-        // SubjectnameId
-        if (JBossSAMLURIConstants.NAMEID_FORMAT_TRANSIENT.get().equals(getNameIDPolicyFormat())
-                && SamlPrincipalType.SUBJECT == getPrincipalType())
-            throw new IllegalArgumentException(
-                    "Can not have Transient NameID Policy Format together with SUBJECT Principal Type");
-
+        //transient name id format is not accepted together with principaltype SubjectnameId
+        if (JBossSAMLURIConstants.NAMEID_FORMAT_TRANSIENT.get().equals(getNameIDPolicyFormat()) && SamlPrincipalType.SUBJECT == getPrincipalType())
+            throw new IllegalArgumentException("Can not have Transient NameID Policy Format together with SUBJECT Principal Type");
+        
     }
 
     public boolean isSpPrivate() {
@@ -660,4 +667,160 @@ public class SpidIdentityProviderConfig extends IdentityProviderModel {
     public void setBillingAnagraficaCodiceEORI(String billingAnagraficaCodiceEORI) {
         getConfig().put(BILLING_ANAGRAFICA_CODICE_EORI, billingAnagraficaCodiceEORI);
     }
+
+
+    public static List<ProviderConfigProperty> getConfigProperties() {
+                return ProviderConfigurationBuilder.create()
+        .property()
+        .name(ORGANIZATION_NAMES)
+        .type(ProviderConfigProperty.STRING_TYPE)
+        .label("identity-provider.spid.organization-names")
+        .helpText("identity-provider.spid.organization-names.tooltip")
+        .add()
+
+        /*
+        .property()
+        .name(IDP_ENTITY_ID)
+        .type(ProviderConfigProperty.STRING_TYPE)
+        .label("identity-provider.spid.idpEntityId")
+        .helpText("identity-provider.spid.idpEntityId.tooltip")
+        .add()
+         */
+
+        .property()
+        .name(ORGANIZATION_DISPLAY_NAMES)
+        .type(ProviderConfigProperty.STRING_TYPE)
+        .label("identity-provider.spid.organization-display-names")
+        .helpText("identity-provider.spid.organization-display-names.tooltip")
+        .add()
+
+        .property()
+        .name(ORGANIZATION_URLS)
+        .type(ProviderConfigProperty.STRING_TYPE)
+        .label("identity-provider.spid.organization-urls")
+        .helpText("identity-provider.spid.organization-urls.tooltip")
+        .add()
+
+        .property()
+        .name(OTHER_CONTACT_SP_PRIVATE)
+        .type(ProviderConfigProperty.BOOLEAN_TYPE)
+        .label("identity-provider.spid.is-sp-private")
+        .helpText("identity-provider.spid.is-sp-private.tooltip")
+        .add()
+
+        .property()
+        .name(OTHER_CONTACT_IPA_CODE)
+        .type(ProviderConfigProperty.STRING_TYPE)
+        .label("identity-provider.spid.ipaCode")
+        .helpText("identity-provider.spid.ipaCode.tooltip")
+        .add()
+
+        .property()
+        .name(OTHER_CONTACT_VAT_NUMBER)
+        .type(ProviderConfigProperty.STRING_TYPE)
+        .label("identity-provider.spid.vatNumber")
+        .helpText("identity-provider.spid.vatNumber.tooltip")
+        .add()
+
+        .property()
+        .name(OTHER_CONTACT_FISCAL_CODE)
+        .type(ProviderConfigProperty.STRING_TYPE)
+        .label("identity-provider.spid.fiscalCode")
+        .helpText("identity-provider.spid.fiscalCode.tooltip")
+        .add()
+
+        .property()
+        .name(OTHER_CONTACT_COMPANY)
+        .type(ProviderConfigProperty.STRING_TYPE)
+        .label("identity-provider.spid.contactCompany.other")
+        .helpText("identity-provider.spid.contactCompany.other.tooltip")
+        .add()
+
+        .property()
+        .name(OTHER_CONTACT_PHONE)
+        .type(ProviderConfigProperty.STRING_TYPE)
+        .label("identity-provider.spid.contactPhone.other")
+        .helpText("identity-provider.spid.contactPhone.other.tooltip")
+        .add()
+
+        .property()
+        .name(OTHER_CONTACT_EMAIL)
+        .type(ProviderConfigProperty.STRING_TYPE)
+        .label("identity-provider.spid.contactEmail.other")
+        .helpText("identity-provider.spid.contactEmail.other.tooltip")
+        .add()
+
+        .property()
+        .name(BILLING_CONTACT_COMPANY)
+        .type(ProviderConfigProperty.STRING_TYPE)
+        .label("identity-provider.spid.contactCompany.billing")
+        .helpText("identity-provider.spid.contactCompany.billing.tooltip")
+        .add()
+
+        .property()
+        .name(BILLING_CONTACT_PHONE)
+        .type(ProviderConfigProperty.STRING_TYPE)
+        .label("identity-provider.spid.contactPhone.billing")
+        .helpText("identity-provider.spid.contactPhone.billing.tooltip")
+        .add()
+
+        .property()
+        .name(BILLING_CONTACT_EMAIL)
+        .type(ProviderConfigProperty.STRING_TYPE)
+        .label("identity-provider.spid.contactEmail.billing")
+        .helpText("identity-provider.spid.contactEmail.billing.tooltip")
+        .add()
+
+        .property()
+        .name(BILLING_CODICE_FISCALE)
+        .type(ProviderConfigProperty.STRING_TYPE)
+        .label("identity-provider.spid.cessionarioCommittente.codiceFiscale.billing")
+        .helpText("identity-provider.spid.cessionarioCommittente.codiceFiscale.billing.tooltip")
+        .add()
+
+        .property()
+        .name(BILLING_SEDE_INDIRIZZO)
+        .type(ProviderConfigProperty.STRING_TYPE)
+        .label("identity-provider.spid.cessionarioCommittente.sede")
+        .helpText("identity-provider.spid.cessionarioCommittente.sede.tooltip")
+        .add()
+
+        .property()
+        .name(BILLING_ID_CODICE)
+        .type(ProviderConfigProperty.STRING_TYPE)
+        .label("identity-provider.spid.cessionarioCommittente.idCodice.billing")
+        .helpText("identity-provider.spid.cessionarioCommittente.idCodice.billing.tooltip")
+        .add()
+
+        .property()
+        .name(BILLING_ID_PAESE)
+        .type(ProviderConfigProperty.STRING_TYPE)
+        .label("identity-provider.spid.cessionarioCommittente.idPaese.billing")
+        .helpText("identity-provider.spid.cessionarioCommittente.idPaese.billing.tooltip")
+        .add()
+
+        .property()
+        .name(BILLING_SEDE_CAP)
+        .type(ProviderConfigProperty.STRING_TYPE)
+        .label("identity-provider.spid.cessionarioCommittente.sedeCap.billing")
+        .helpText("identity-provider.spid.cessionarioCommittente.sedeCap.billing.tooltip")
+        .add()
+
+        .property()
+        .name(BILLING_SEDE_PROVINCIA)
+        .type(ProviderConfigProperty.STRING_TYPE)
+        .label("identity-provider.spid.cessionarioCommittente.sedeProvincia.billing")
+        .helpText("identity-provider.spid.cessionarioCommittente.sedeProvincia.billing.tooltip")
+        .add()
+
+        .property()
+        .name(BILLING_SEDE_NAZIONE)
+        .type(ProviderConfigProperty.STRING_TYPE)
+        .label("identity-provider.spid.cessionarioCommittente.sedeComune.billing")
+        .helpText("identity-provider.spid.cessionarioCommittente.sedeComune.billing.tooltip")
+        .add()
+
+        .build();
+    }
+    
 }

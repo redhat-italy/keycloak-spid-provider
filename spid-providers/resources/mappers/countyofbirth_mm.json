@@ -1,0 +1,11 @@
+{
+    "name": "County Of Birth",
+    "identityProviderAlias": "CHANGE-IT",
+    "identityProviderMapper": "spid-user-attribute-idp-mapper",
+    "config": {
+        "syncMode": "INHERIT",
+        "user.attribute": "spid-countyOfBirth",
+        "attribute": "countyOfBirth",
+        "attribute.name": "countyOfBirth"
+    }
+}

@@ -6,23 +6,19 @@
     <div id="kc-form">
         <!-- SPID -->
         <#if social.providers??>
-          <div class="spid-title">Accesso tramite SPID</div>
+          <div class="spid-title">${msg("login.spid.access")}</div>
           <div class="spid-info">
-              SPID, il <b>Sistema Pubblico di Identit&agrave; Digitale</b>, &egrave; il sistema di accesso che consente di utilizzare, con un&#39;identit&agrave; digitale unica, i servizi online della Pubblica Amministrazione e dei privati accreditati.
-              <br/>
-              Se sei gi&agrave; in possesso di un&#39;identit&agrave; digitale, accedi con le credenziali del tuo gestore.
-              <br/>
-              Se non hai ancora un&#39;identit&agrave; digitale, richiedila ad uno dei gestori.
+              ${msg("login.spid.info")?no_esc}
           </div>
           <div class="spid-info-links">
-              <span class="spid-info-link"><a href="https://www.spid.gov.it">Maggiori informazioni</a></span>
-              <span class="spid-info-link"><a href="https://www.spid.gov.it/richiedi-spid">Non hai SPID?</a></span>
-              <span class="spid-info-link"><a href="https://www.spid.gov.it/serve-aiuto">Serve aiuto?</a></span>
+              <span class="spid-info-link"><a href="https://www.spid.gov.it">${msg("login.spid.more-info")}</a></span>
+              <span class="spid-info-link"><a href="https://www.spid.gov.it/richiedi-spid">${msg("login.spid.dont-have")}</a></span>
+              <span class="spid-info-link"><a href="https://www.spid.gov.it/serve-aiuto">${msg("login.spid.need-help")}</a></span>
           </div>
           <div class="spid-idp-button-box">
               <a href="#" class="italia-it-button italia-it-button-size-m button-spid" spid-idp-button="#spid-idp-button-medium-get" aria-haspopup="true" aria-expanded="false">
                   <span class="italia-it-button-icon"><img src="${url.resourcesPath}/img/spid-ico-circle-bb.svg" onerror="this.src='img/spid-ico-circle-bb.png'; this.onerror=null;" alt="" /></span>
-                  <span class="italia-it-button-text">Entra con SPID</span>
+                  <span class="italia-it-button-text">${msg("login.spid.enter")}</span>
               </a>
               <div id="spid-idp-button-medium-get" class="spid-idp-button spid-idp-button-tip spid-idp-button-relative">
                   <ul id="spid-idp-list-medium-root-get" class="spid-idp-button-menu" aria-labelledby="spid-idp">
@@ -36,7 +32,7 @@
                            <a href="#"><span class="spid-sr-only">Etna ID</span><img src="${url.resourcesPath}/img/spid-idp-etnaid.svg" onerror="this.src='img/spid-idp-etnaid.png'; this.onerror=null;" alt="Etna ID" /></a>
                       </li>
                       <li class="spid-idp-button-link" id="sielteid" data-idp="sielteid">
-                           <a href="#"><span class="spid-sr-only">Sielte ID</span><img src="${url.resourcesPath}/img/spid-idp-sielte.svg" onerror="this.src='img/spid-idp-sielte.png'; this.onerror=null;" alt="Sielte ID" /></a>
+                           <a href="#"><span class="spid-sr-only">Sielte ID</span><img src="${url.resourcesPath}/img/spid-idp-sielteid.svg" onerror="this.src='img/spid-idp-sielteid.png'; this.onerror=null;" alt="Sielte ID" /></a>
                       </li>
                       <li class="spid-idp-button-link" id="infocertid" data-idp="infocertid">
                           <a href="#"><span class="spid-sr-only">Infocert ID</span><img src="${url.resourcesPath}/img/spid-idp-infocertid.svg" onerror="this.src='img/spid-idp-infocertid.png'; this.onerror=null;" alt="Infocert ID" /></a>
@@ -59,17 +55,23 @@
                       <li class="spid-idp-button-link" id="timid" data-idp="timid">
                           <a href="#"><span class="spid-sr-only">Tim ID</span><img src="${url.resourcesPath}/img/spid-idp-timid.svg" onerror="this.src='img/spid-idp-timid.png'; this.onerror=null;" alt="Tim ID" /></a>
                       </li>
+                      <li class="spid-idp-button-link" id="intesigroupid" data-idp="intesigroupid">
+                         <a href="#"><span class="spid-sr-only">Intesi Group</span><img src="${url.resourcesPath}/img/spid-idp-intesigroup.svg" onerror="this.src='img/spid-idp-intesigroup.png'; this.onerror=null;" alt="Intesi Group" /></a>
+                      </li>
                       <li class="spid-idp-button-link" id="spidtestidp" data-idp="spidtestidp">
-                          <a href="#"><span class="spid-sr-only">spidtestidp</span><img src="${url.resourcesPath}/img/spid-idp-test.svg" alt="spidtestidp" /> SPID SAML Check</a>
+                          <a href="#"><span class="spid-sr-only">spidtestidp</span><img src="${url.resourcesPath}/img/spid-idp-test.svg" alt="spidtestidp" /> SPID SAML Check (Public)</a>
+                      </li>
+                      <li class="spid-idp-button-link" id="privatespid" data-idp="privatespid">
+                          <a href="#"><span class="spid-sr-only">privatespid</span><img src="${url.resourcesPath}/img/spid-idp-test.svg" alt="privatespid" /> SPID SAML Check (Private)</a>
                       </li>
                       <li class="spid-idp-support-link">
-                          <a href="https://www.spid.gov.it">Maggiori informazioni</a>
+                          <a href="https://www.spid.gov.it">${msg("login.spid.more-info")}</a>
                       </li>
                       <li class="spid-idp-support-link">
-                          <a href="https://www.spid.gov.it/richiedi-spid">Non hai SPID?</a>
+                          <a href="https://www.spid.gov.it/richiedi-spid">${msg("login.spid.dont-have")}</a>
                       </li>
                       <li class="spid-idp-support-link">
-                          <a href="https://www.spid.gov.it/serve-aiuto">Serve aiuto?</a>
+                          <a href="https://www.spid.gov.it/serve-aiuto">${msg("login.spid.need-help")}</a>
                       </li>
                   </ul>
               </div>
@@ -97,21 +99,22 @@
                 "${p.alias}": "${p.loginUrl?no_esc}",
                 </#list>
             }
-
+            // social provider is the key, dom id is the value
             window.spidprovidermatch = {
                 "spidtestidp": "spidtestidp",
-                "Aruba ID": "arubaid",
-                "Etna ID": "etnaid",
-                "Infocert ID": "infocertid",
-                "Intesa ID": "intesaid",
-                "Inforcamere ID": "infocamereid",
-                "Lepida ID": "lepidaid",
-                "Namirial ID": "namirialid",
-                "Poste ID": "posteid",
-                "Sielte ID": "sielteid",
-                "SPIDItalia Register.it": "spiditaliaid",
-                "TeamSystem ID": "teamsystemid",
-                "Tim ID": "timid"
+                "privatespid": "privatespid",
+                "arubaid": "arubaid",
+                "etnaid": "etnaid",
+                "infocertid": "infocertid",
+                "infocamereid": "infocamereid",
+                "lepidaid": "lepidaid",
+                "namirialid": "namirialid",
+                "posteid": "posteid",
+                "sielteid": "sielteid",
+                "spiditaliaid": "spiditaliaid",
+                "teamsystemid": "teamsystemid",
+                "intesigroupid": "intesigroupid",
+                "timid": "timid"
             }
             $(document).ready(function(){
                 for (const [key, value] of Object.entries(spidprovidermatch)) {
@@ -126,7 +129,7 @@
 
           </script>
         </#if>
-        <!-- ENF OF SPID -->
+        <!-- END OF SPID -->
 
     </div>
     </#if>
